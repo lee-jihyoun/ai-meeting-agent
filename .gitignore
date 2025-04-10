@@ -1,6 +1,7 @@
 # Python 관련
 __pycache__/
 .venv/
+venv/
 
 # 환경 변수
 .env
