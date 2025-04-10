@@ -1,0 +1,11 @@
+# Python 관련
+__pycache__/
+.venv/
+
+# 환경 변수
+.env
+
+# OS/IDE 관련
+.DS_Store
+*.swp
+*.tmp
