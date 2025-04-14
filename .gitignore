@@ -10,3 +10,6 @@ venv/
 .DS_Store
 *.swp
 *.tmp
+
+# 디렉토리 관련
+docs/

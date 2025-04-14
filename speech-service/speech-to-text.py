@@ -26,7 +26,8 @@ speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audi
 # 결과 수신 핸들러
 def recognized_handler(evt):
     if evt.result.text:
-        print("📝 인식된 문장:", evt.result.text)
+        # print("📝 인식된 문장:", evt.result.text)
+        print(evt.result.text)
 
 def canceled_handler(evt):
     print("🚫 인식 취소됨:", evt.result)
