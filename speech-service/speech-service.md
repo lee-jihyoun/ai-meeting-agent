@@ -32,11 +32,36 @@ https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices
 
 ### 패키지 설치
 
+```bash
 pip install azure-cognitiveservices-speech
-
 pip install dotenv
+```
 
-# 3. 결과
+# 3. 실행 방법 및 코드 설명
+- 기본적으로 영어로 전사하며, 원하는 언어 설정을 해줘야 합니다.
+```bash
+speech_config.speech_recognition_language = "ko-KR"
+```
+
+- 한 번만 실행 (음성이 들어오면 멈춥니다.)
+```bash
+speech_recognizer.recognize_once()
+```
+
+- 지속적으로 실행 (time.sleep(s) 내에 있는 시간만큼 실시간으로 전사합니다.)
+```bash
+print("🎙️ 한국어 음성 인식 시작 (10분 동안)... 말을 해보세요.")
+speech_recognizer.start_continuous_recognition()
+
+# 10분 동안 대기
+time.sleep(600)  # 600초 = 10분
+
+# 인식 종료
+speech_recognizer.stop_continuous_recognition()
+```
+- README.md 파일을 참고하여 서비스를 실행합니다.
+
+# 4. 결과
 
 2025.04.14(월) 3명의 대화 내용을 gpt-4o 모델을 사용해서 회의록 작성을 요청
 
@@ -80,7 +105,7 @@ pip install dotenv
 여기까지만 해도 이제 화 확인해 볼까요, 해볼까?
 ```
 
-# 4. 회의록 작성 요청
+# 5. 회의록 작성 요청
 - stt 기능 검증을 위해 gpt-4o 모델 사용하여 회의록 작성
 - azure stt 내 화자 구분이 되지 않는 상황에서도 회의록의 정확도 확인
 
