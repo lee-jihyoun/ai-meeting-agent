@@ -57,7 +57,7 @@ AI_SERVICE_REGION=koreacentral
 
 ```bash
 cd speech-service
-python speech-service.py
+python speech-to-text.py
 ```
 
 ### Document Intelligence 실행
