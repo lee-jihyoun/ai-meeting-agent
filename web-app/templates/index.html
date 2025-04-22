@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회의 시작</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 100px;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005ea6;
+    }
+    .message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Teams 회의 시작</h1>
+  <button onclick="startMeeting()">회의 시작</button>
+
+  <div class="message" id="messageBox"></div>
+
+  <script>
+    async function startMeeting() {
+      try {
+        const response = await fetch('/start_meeting', { method: 'POST' });
+        const result = await response.json();
+        document.getElementById('messageBox').textContent = result.message;
+      } catch (error) {
+        document.getElementById('messageBox').textContent = '요청 중 오류가 발생했습니다.';
+        console.error('Error:', error);
+      }
+    }
+  </script>
+</body>
+</html>
