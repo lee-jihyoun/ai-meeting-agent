@@ -31,7 +31,7 @@ source venv/bin/activate
 ### Windows
 ```bash
 python -m venv venv
-venv\Scripts\activate
+source venv/Scripts/activate
 ```
 ※ 가상환경은 ai-meeting-agent/ 최상위 폴더에 생성합니다.
 
