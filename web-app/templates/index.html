@@ -29,17 +29,23 @@
 </head>
 <body>
   <h1>Teams 회의 시작</h1>
+  <!-- Teams '회의 시작' 버튼 클릭 -->
   <button onclick="startMeeting()">회의 시작</button>
 
+  <!-- web-app.py 로부터 message 받아옴 -->
   <div class="message" id="messageBox"></div>
 
   <script>
+    // '회의 시작' 버튼 클릭에 의해 실행되는 실제 함수
     async function startMeeting() {
       try {
+        // POST 요청으로 전송
         const response = await fetch('/start_meeting', { method: 'POST' });
         const result = await response.json();
+        // 결과중 result.message 부분을 받아와서 id messageBox인 div 내에서 보여줌
         document.getElementById('messageBox').textContent = result.message;
       } catch (error) {
+        // 에러가 발생할 경우도 id messageBox인 div 내에서 보여줌 
         document.getElementById('messageBox').textContent = '요청 중 오류가 발생했습니다.';
         console.error('Error:', error);
       }

@@ -16,18 +16,22 @@ def start_meeting():
         "meetingId": "2025-04-22-회의",
         "startedBy": "홍길동"
     }
-
+    # TODO 상용 배포일 경우, 추후 print문 제거 필요
     print(f"[요청] Logic App 에 전송 : {data}")
 
     try:
         response = requests.post(LOGIC_APP_URL, json=data)
+        # TODO 상용 배포일 경우, 추후 print문 제거 필요
         print(f"[응답] 상태코드 : {response.status_code}, 본문 : {response.text}")
+
         if response.status_code == 200:
             return jsonify({"message": "회의가 성공적으로 시작되었습니다!"})
         else:
             return jsonify({"message": f"Logic App 호출 실패: {response.status_code}"}), 500
     except Exception as e:
+        # TODO 상용 배포일 경우, 추후 print문 제거 필요
         print(f"[오류] {str(e)}")
+
         return jsonify({"message": f"오류 발생: {str(e)}"}), 500
 
 
