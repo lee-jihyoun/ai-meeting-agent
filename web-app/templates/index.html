@@ -35,6 +35,11 @@
   <!-- web-app.py 로부터 message 받아옴 -->
   <div class="message" id="messageBox"></div>
 
+  <div>
+    <h2>회의 요약</h2>
+    <pre id="summary-box">요약 대기 중...</pre>
+  </div>
+
   <script>
     // '회의 시작' 버튼 클릭에 의해 실행되는 실제 함수
     async function startMeeting() {
@@ -50,6 +55,15 @@
         console.error('Error:', error);
       }
     }
+
+    async function fetchSummary() {
+      const res = await fetch("/get_summary");
+      const data = await res.json();
+      document.getElementById("summary-box").innerText = data.summary || "요약 대기 중...";
+    }
+
+    setInterval(fetchSummary, 5000);  // 5초마다 요약 갱신
+    
   </script>
 </body>
 </html>
