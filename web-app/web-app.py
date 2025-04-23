@@ -27,15 +27,19 @@ def start_meeting():
             }), 502
 
         # STT subprocess 실행
-        def run_stt():
+        def run_audio_client():
             # client_audio_stream.py 호출
             result = subprocess.call(["python", "speech-service/client_audio_stream.py"])
             if result != 0:
                 print(f"STT client exit code: {result}")
 
-        threading.Thread(target=run_stt).start()
+        def run_image_loop():
+            subprocess.call(["python", "image_capture_loop.py"])
 
-        return jsonify({"message": "🎧 회의 음성 수집이 시작되었습니다!"}), 200
+        threading.Thread(target=run_audio_client).start()
+        threading.Thread(target=run_image_loop).start()
+
+        return jsonify({"message": "🎧 음성 및 이미지 캡처가 시작되었습니다!"}), 200
 
     except Exception as e:
         return jsonify({
