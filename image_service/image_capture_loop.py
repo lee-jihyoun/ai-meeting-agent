@@ -2,7 +2,7 @@ import time
 import datetime
 import pyautogui
 from blob_uploader import upload_to_blob
-from document_intelligence import analyze_document, summarize_result, save_summary_to_file
+from analyze_and_summarize import analyze_document, summarize_result, save_summary_to_file
 
 CAPTURE_INTERVAL = 60  # 초
 
@@ -26,7 +26,7 @@ def run_capture_loop():
 
         # 3. 저장
         save_summary_to_file(summary)
-        
+
         # 4. 다음 캡처까지 대기
         time.sleep(CAPTURE_INTERVAL)
 
