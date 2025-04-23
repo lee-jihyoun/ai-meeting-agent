@@ -85,6 +85,7 @@ def save_summary_to_file(summary, output_path="summary.txt"):
         f.write("\n" + "="*50 + "\n")
     print(f"💾 요약 저장됨: {output_path}")
 
+    # TODO : /run_summary 관련 코드 중복 이슈 있는 부분 (index.html 의 sendSummary() 함수와 기능 겹침)
     # Flask 서버에 run_summary API 호출 (자동 이메일 발송 등 처리)
     try:
         response = requests.post("http://localhost:5000/run_summary", json={
