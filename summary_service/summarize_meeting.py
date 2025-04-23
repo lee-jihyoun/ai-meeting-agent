@@ -29,7 +29,8 @@ def transcribe_audio(file_path):
     audio_config = speechsdk.audio.AudioConfig(filename=file_path)
     recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
-    result = recognizer.recognize_once()
+    # Azure Speech 실시간 스트리밍 방식 적용 : recognize_once() 대신 start_continuous_recognition 사용
+    result = recognizer.start_continuous_recognition()
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
         return result.text
     else:
