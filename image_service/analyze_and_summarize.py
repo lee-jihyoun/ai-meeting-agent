@@ -73,8 +73,9 @@ def summarize_result(result_json):
         print(f"⚠️ 요약 실패: {e}")
         return "요약 불가"
     
-# 요약 결과를 파일로 저장하는 함수
+# 요약 결과를 파일로 저장하고 서버에 알리는 함수
 def save_summary_to_file(summary, output_path="summary.txt"):
+    # 요약 내용을 파일에 저장
     with open(output_path, "a", encoding="utf-8") as f:
         # 날짜 기록
         f.write(f"\n\n📅 {datetime.datetime.now()}\n")
@@ -83,6 +84,18 @@ def save_summary_to_file(summary, output_path="summary.txt"):
         # 구분선 추가
         f.write("\n" + "="*50 + "\n")
     print(f"💾 요약 저장됨: {output_path}")
+
+    # Flask 서버에 run_summary API 호출 (자동 이메일 발송 등 처리)
+    try:
+        response = requests.post("http://localhost:5000/run_summary", json={
+            "filename": output_path
+        })
+        if response.status_code == 200:
+            print("📨 서버에 요약 전송 및 이메일 발송 완료!")
+        else:
+            print(f"⚠️ 서버 응답 오류: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"❌ 서버 통신 실패: {e}")
 
 
 # 테스트 실행 (직접 실행 시)

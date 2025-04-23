@@ -40,6 +40,8 @@
     <pre id="summary-box">요약 대기 중...</pre>
   </div>
 
+  <button onclick="sendSummary()">요약 생성 및 이메일 전송</button>
+
   <script>
     // '회의 시작' 버튼 클릭에 의해 실행되는 실제 함수
     async function startMeeting() {
@@ -63,6 +65,21 @@
     }
 
     setInterval(fetchSummary, 5000);  // 5초마다 요약 갱신
+
+    // TODO : 중복기능 구현 이슈 : 직접 버튼으로 호출할지 or 서버에서 자동 호출할지 결정 필요!
+    // (analyze_and_summarize.py 파일 내 save_summary_to_file() 함수와 역할 겹침)
+    // 웹페이지에서 버튼으로 직접 호출하고자 하는 경우 
+    async function sendSummary() {
+      const response = await fetch('/run_summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ filename: 'summary.txt' })  // 실제 요약 파일명
+      });
+      const result = await response.json();
+      document.getElementById('messageBox').textContent = result.message;
+}
     
   </script>
 </body>
