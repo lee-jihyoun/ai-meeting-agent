@@ -12,27 +12,32 @@ def index():
 
 @app.route('/start_meeting', methods=['POST'])
 def start_meeting():
-    data = {
-        "meetingId": "2025-04-22-회의",
-        "startedBy": "홍길동"
-    }
-    # TODO 상용 배포일 경우, 추후 print문 제거 필요
-    print(f"[요청] Logic App 에 전송 : {data}")
-
     try:
-        response = requests.post(LOGIC_APP_URL, json=data)
-        # TODO 상용 배포일 경우, 추후 print문 제거 필요
-        print(f"[응답] 상태코드 : {response.status_code}, 본문 : {response.text}")
+        # Logic App에 회의 시작 신호 전송
+        logic_res = requests.post(LOGIC_APP_URL, json={"event": "meeting_started"})
+        
+        if logic_res.status_code != 200:
+            return jsonify({
+                "message": "⚠️ Logic App 호출 실패",
+                "logic_status": logic_res.status_code
+            }), 502
 
-        if response.status_code == 200:
-            return jsonify({"message": "회의가 성공적으로 시작되었습니다!"})
-        else:
-            return jsonify({"message": f"Logic App 호출 실패: {response.status_code}"}), 500
+        # STT subprocess 실행
+        def run_stt():
+            # client_audio_stream.py 호출
+            result = subprocess.call(["python", "speech-service/client_audio_stream.py"])
+            if result != 0:
+                print(f"STT client exit code: {result}")
+
+        threading.Thread(target=run_stt).start()
+
+        return jsonify({"message": "🎧 회의 음성 수집이 시작되었습니다!"}), 200
+
     except Exception as e:
-        # TODO 상용 배포일 경우, 추후 print문 제거 필요
-        print(f"[오류] {str(e)}")
-
-        return jsonify({"message": f"오류 발생: {str(e)}"}), 500
+        return jsonify({
+            "message": "⚠️ 예기치 않은 오류 발생",
+            "error": str(e)
+        }), 500
 
 
 # TODO: 아래 코드 반드시 필요한지 확인할것 (chatGPT 답변 참고)    
