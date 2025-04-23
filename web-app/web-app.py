@@ -1,7 +1,11 @@
+from summary_service.summarize_meeting import summarize_meeting
+from summary_service.email_sender import send_summary_email
 from flask import Flask, render_template, request, jsonify
 import requests
 
 app = Flask(__name__)
+
+latest_summary = ""
 
 # TODO: .env 에서 받아오는 방식으로 수정 필요
 LOGIC_APP_URL = "https://your-logicapp-url.com/..."  # <- 여기에 실제 Logic App URL 입력!
@@ -38,6 +42,21 @@ def start_meeting():
             "message": "⚠️ 예기치 않은 오류 발생",
             "error": str(e)
         }), 500
+
+# Flask 서버에서 요약 결과를 전달한것을 받음
+@app.route('/get_summary')
+def get_summary():
+    return jsonify({"summary": latest_summary})
+
+# TODO 이메일 보낼 대상 .env 에서 관리하도록 처리 필요
+# 요약된 내용을 이메일 발송
+@app.route('/run_summary', methods=['POST'])
+def run_summary():
+    global latest_summary
+    filename = request.json.get("filename")
+    latest_summary = summarize_meeting(filename)
+    send_summary_email(latest_summary, ["example@domain.com"])
+    return jsonify({"message": "요약 및 이메일 발송 완료!"})
 
 
 # TODO: 아래 코드 반드시 필요한지 확인할것 (chatGPT 답변 참고)    
