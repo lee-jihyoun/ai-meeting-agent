@@ -78,6 +78,7 @@ def run_summary():
     send_summary_email(latest_summary, ["example@domain.com"]) # 이메일 발송
     return jsonify({"message": "요약 및 이메일 발송 완료!"})
 
+# Logic App에서 이미지를 Blob Storage에 업로드한 후, 그 업로드된 이미지 URL(blob_url)을 서버에 알려줄 때 호출하는 엔드포인트
 @app.route("/document_uploaded", methods=["POST"])
 def handle_uploaded_document():
     """

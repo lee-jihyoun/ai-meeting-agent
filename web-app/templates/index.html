@@ -42,6 +42,13 @@
 
   <button onclick="sendSummary()">요약 생성 및 이메일 전송</button>
 
+  <div style="margin-top: 40px;">
+    <h2>업로드된 이미지 수동 분석</h2>
+    <input type="text" id="blobUrlInput" placeholder="Blob URL 입력" style="width: 60%; padding: 8px;" />
+    <button onclick="sendBlobUrl()">서버에 알리기</button>
+  </div>
+  <div class="message" id="uploadMessageBox"></div>
+
   <script>
     // '회의 시작' 버튼 클릭에 의해 실행되는 실제 함수
     async function startMeeting() {
@@ -79,7 +86,37 @@
       });
       const result = await response.json();
       document.getElementById('messageBox').textContent = result.message;
-}
+    }
+
+    async function sendBlobUrl() {
+      const blobUrl = document.getElementById('blobUrlInput').value;
+
+      if (!blobUrl) {
+        alert("⚠️ Blob URL을 입력해주세요.");
+        return;
+      }
+
+      try {
+        const response = await fetch("/document_uploaded", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ blob_url: blobUrl })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('uploadMessageBox').innerText = `✅ 성공: ${data.message}`;
+          document.getElementById("summary-box").innerText = data.summary || "요약 결과 없음";
+        } else {
+          document.getElementById('uploadMessageBox').innerText = `❌ 오류: ${data.error}`;
+        }
+      } catch (err) {
+        console.error("요청 실패:", err);
+        document.getElementById('uploadMessageBox').innerText = "🚨 요청 실패: 서버 오류 또는 연결 문제";
+      }
+    }
     
   </script>
 </body>
