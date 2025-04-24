@@ -32,62 +32,74 @@
   <!-- Teams '회의 시작' 버튼 클릭 -->
   <button onclick="startMeeting()">회의 시작</button>
 
-  <!-- web-app.py 로부터 message 받아옴 -->
+  <!-- web-app.py(Flask 서버)로부터 message 받아와서 표시 -->
   <div class="message" id="messageBox"></div>
 
   <div>
     <h2>회의 요약</h2>
+    <!-- 서버에서 받은 요약결과를 표시하는 영역 -->
     <pre id="summary-box">요약 대기 중...</pre>
   </div>
 
+  <!-- 요약 생성 및 이메일 발송 버튼 -->
   <button onclick="sendSummary()">요약 생성 및 이메일 전송</button>
 
+  <!-- 수동으로 이미지 분석할 수 있는 입력 영역 -->
   <div style="margin-top: 40px;">
     <h2>업로드된 이미지 수동 분석</h2>
     <input type="text" id="blobUrlInput" placeholder="Blob URL 입력" style="width: 60%; padding: 8px;" />
+    <!-- 수동 분석 버튼 클릭시 sendBlobUrl() 함수 호출 -->
     <button onclick="sendBlobUrl()">서버에 알리기</button>
   </div>
+  <!-- 수동 분석 결과 메시지 표시 영역 -->
   <div class="message" id="uploadMessageBox"></div>
 
   <script>
     // '회의 시작' 버튼 클릭에 의해 실행되는 실제 함수
     async function startMeeting() {
       try {
-        // POST 요청으로 전송
+        // POST 요청으로 전송 (Flask의 /start_meeting API 에 POST 요청)
         const response = await fetch('/start_meeting', { method: 'POST' });
         const result = await response.json();
-        // 결과중 result.message 부분을 받아와서 id messageBox인 div 내에서 보여줌
+        // 결과중 result.message 부분을 받아와서 id messageBox인 div 내에서 보여줌(서버로부터 받은 메시지 표시)
         document.getElementById('messageBox').textContent = result.message;
       } catch (error) {
-        // 에러가 발생할 경우도 id messageBox인 div 내에서 보여줌 
+        // 에러가 발생할 경우도 id messageBox인 div 내에서 보여줌 (에러 발생시 메시지 박스에 에러 메시지 출력)
         document.getElementById('messageBox').textContent = '요청 중 오류가 발생했습니다.';
         console.error('Error:', error);
       }
     }
 
+    // 5초마다 서버로부터 최신 요약정보를 받아오는 함수
     async function fetchSummary() {
-      const res = await fetch("/get_summary");
-      const data = await res.json();
+      const res = await fetch("/get_summary"); // Flask의 /get_summary API 호출
+      const data = await res.json(); // 응답 파싱
+      // summary-box에 요약 텍스트 표시
       document.getElementById("summary-box").innerText = data.summary || "요약 대기 중...";
     }
 
-    setInterval(fetchSummary, 5000);  // 5초마다 요약 갱신
+    setInterval(fetchSummary, 5000);  // 5초마다 요약 갱신(fetchSummary 실행 (자동 갱신))
 
     // TODO : 중복기능 구현 이슈 : 직접 버튼으로 호출할지 or 서버에서 자동 호출할지 결정 필요!
     // (analyze_and_summarize.py 파일 내 save_summary_to_file() 함수와 역할 겹침)
     // 웹페이지에서 버튼으로 직접 호출하고자 하는 경우 
+    // 수동으로 요약을 생성하고 이메일을 발송하는 함수
     async function sendSummary() {
       const response = await fetch('/run_summary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ filename: 'summary.txt' })  // 실제 요약 파일명
+        body: JSON.stringify({ filename: 'summary.txt' })  // 실제 요약 파일명 (전달)
       });
       const result = await response.json();
+      // 서버 응답 메시지를 messageBox에 표시
       document.getElementById('messageBox').textContent = result.message;
     }
 
+
+    // (speech to text 기능이 아닌) image(document) intelligence 에 대한 부분
+    // 업로드된 이미지의 Blob URL을 서버로 전송하고 분석/요약을 수행하는 함수
     async function sendBlobUrl() {
       const blobUrl = document.getElementById('blobUrlInput').value;
 
@@ -102,14 +114,16 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ blob_url: blobUrl })
+          body: JSON.stringify({ blob_url: blobUrl }) // JSON 형식으로 서버에 전달
         });
 
         const data = await response.json();
         if (response.ok) {
+          // 성공시 요약 및 메시지 출력
           document.getElementById('uploadMessageBox').innerText = `✅ 성공: ${data.message}`;
           document.getElementById("summary-box").innerText = data.summary || "요약 결과 없음";
         } else {
+          // 실패 메시지 출력
           document.getElementById('uploadMessageBox').innerText = `❌ 오류: ${data.error}`;
         }
       } catch (err) {
