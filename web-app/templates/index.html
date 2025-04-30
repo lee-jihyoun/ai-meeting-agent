@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>회의 시작</title>
   <style>
     body {
@@ -28,28 +29,27 @@
   </style>
 </head>
 <body>
-  <h1>Teams 회의 시작</h1>
-  <!-- Teams '회의 시작' 버튼 클릭 -->
-  <button onclick="startMeeting()">회의 시작</button>
 
-  <!-- web-app.py 로부터 message 받아옴 -->
-  <div class="message" id="messageBox"></div>
+  <h1>Teams 회의 시작</h1>
+  <!-- <form action='/api/start_meeting' method ="post" enctype="multipart/form-data"> -->
+  <form action='/start_meeting' method ="post" enctype="application/json; charset=utf-8"> 
+    <input type="hidden" name="hiddenValue" id="hiddenValue" value="200">
+    <br>
+
+    <label for="writerName">작성자명 : </label>
+    <input type="text" name="writerName" id="writerName" placeholder="작성자명을 입력해주세요." required>
+    <br>
+
+    <label for="date">날짜 : </label>
+    <input type="date" name="date" id="date" required>
+    <br>
+
+    <!-- Teams '회의 시작' 버튼 클릭 -->
+    <button type="submit">"회의 시작"</button>
+
+  </form> 
 
   <script>
-    // '회의 시작' 버튼 클릭에 의해 실행되는 실제 함수
-    async function startMeeting() {
-      try {
-        // POST 요청으로 전송
-        const response = await fetch('/start_meeting', { method: 'POST' });
-        const result = await response.json();
-        // 결과중 result.message 부분을 받아와서 id messageBox인 div 내에서 보여줌
-        document.getElementById('messageBox').textContent = result.message;
-      } catch (error) {
-        // 에러가 발생할 경우도 id messageBox인 div 내에서 보여줌 
-        document.getElementById('messageBox').textContent = '요청 중 오류가 발생했습니다.';
-        console.error('Error:', error);
-      }
-    }
   </script>
 </body>
 </html>
