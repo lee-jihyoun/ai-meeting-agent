@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회의 알림 시스템</title>
+</head>
+<body>
+    <h2>회의 알림 시스템</h2>
+
+    <button onclick="subscribe()">구독하기</button>
+    <button onclick="unsubscribe()">구독 취소</button>
+
+    <p id="response"></p>
+
+    <script>
+        function sendRequest(action) {
+            fetch('/webhook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: action,
+                    email: "user@example.com"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").innerText = JSON.stringify(data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function subscribe() {
+            sendRequest("subscribe");
+        }
+
+        function unsubscribe() {
+            sendRequest("unsubscribe");
+        }
+    </script>
+</body>
+</html>
