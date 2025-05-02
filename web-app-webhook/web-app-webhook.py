@@ -4,14 +4,18 @@ app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook_handler():
+    # 요청 데이터(JSON)를 가져옴
     data = request.get_json()
 
+    # 예외 처리: 데이터가 없거나 "action"이 없을 경우 오류 반환
     if not data or "action" not in data:
         return jsonify({"error": "Missing action parameter"}), 400
 
+    # action 값을 가져옴
     action = data.get("action")
     email = data.get("email")
 
+    # action 값에 따라 분기 처리
     if action == "subscribe":
         return process_subscription(email)
     elif action == "unsubscribe":
