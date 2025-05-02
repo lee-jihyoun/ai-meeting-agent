@@ -40,23 +40,22 @@ def start_meeting():
     external_url = "http://localhost:5000/api" # 외부 API URL 예시
 
     external_data = {
-        'hiddenValue': hidden_value,
-        'writerName': writer_name,
+        'hidden_value': hidden_value,
+        'writer_name': writer_name,
         'date': date
     }
 
-    try:    
-        json_string = json.dumps(external_data, ensure_ascii=False).encode('utf-8')
-        headers = {'Content-Type': 'application/json; charset=utf-8', 'Accept': 'text/plain'}
+    try:
+        json_string = json.dumps(external_data, ensure_ascii=False)
+        
+        headers = {'Content-Type': 'application/json; charset=utf-8'}
 
+        # 디버깅 목적으로 출력
         print("Received in /start_meeting:", json_string)
 
         external_response  = requests.post(external_url, json=external_data, headers=headers)
 
         print(f"Received after external_response:", {external_response.text})
-
-        # JSON 형식으로 응답 변환
-        # return jsonify(response.json()) # 응답 반환
 
         print(f"[응답] 상태코드 : {external_response.status_code}, 본문 : {external_response.text}")
         if external_response.status_code == 200:
