@@ -18,20 +18,21 @@ def webhook_handler():
     # action 값을 가져옴
     action = data.get("action")
     email = data.get("email")
+    attendees = data.get("attendees")
 
     # action 값에 따라 분기 처리
     if action == "startMeeting":
-        return process_start_meeting(email)
-    elif action == "stopMeeting":
-        return process_stop_meeting(email)
+        return process_start_meeting(email, attendees)
+    elif action == "endMeeting":
+        return process_end_meeting(email)
     else:
         return jsonify({"error": "Invalid action type"}), 400
 
-def process_start_meeting(email):
-    return jsonify({"status": "startMeeting", "email": email})
+def process_start_meeting(email, attendees):
+    return jsonify({"status": "startMeeting", "email": email, "attendees" : attendees})
 
-def process_stop_meeting(email):
-    return jsonify({"status": "stopMeeting", "email": email})
+def process_end_meeting(email):
+    return jsonify({"status": "endMeeting", "email": email})
 
 if __name__ == '__main__':
     app.run(debug=True)

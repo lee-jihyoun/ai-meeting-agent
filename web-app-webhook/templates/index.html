@@ -2,24 +2,101 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>회의 알림 시스템</title>
+    <title>Plamingo 회의 시스템</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .button-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .input-row input, .input-row select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1;
+            margin-right: 10px;
+        }
+        .input-row input:last-child, .input-row select:last-child {
+            margin-right: 0;
+        }
+        #response {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h2>회의 알림 시스템</h2>
+    <h2>Plamingo 회의 시스템</h2>
 
     <button onclick="startMeeting()">회의 시작</button>
-    <button onclick="stopMeeting()">회의 종료</button>
+    <button onclick="endMeeting()">회의 종료</button>
 
+    <div id="attendees"></div>
+    <button id="addAttendee">참석자 추가</button>
     <p id="response"></p>
 
     <script>
+        const attendees = []; // 참석자 정보를 저장할 배열
+
         function sendRequest(action) {
+            const attendeeInputs = document.querySelectorAll('.input-row');
+            attendees.length = 0; //배열 초기화
+
+            attendeeInputs.forEach(row => {
+                const name = row.children[0].value;
+                const position = row.children[1].value;
+                const email = row.children[2].value;
+
+                if(name && position !== '직급 선택' && email) { //유효성 검사
+                    attendees.push({ name, position, email });
+                }
+            });
+            
             fetch('/webhook', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    attendees,
                     action: action,
                     email: "user@example.com" //TODO : 하드코딩 필요한 값인지 확인할것
                 })
@@ -35,9 +112,40 @@
             sendRequest("startMeeting");
         }
 
-        function stopMeeting() {
-            sendRequest("stopMeeting");
+        function endMeeting() {
+            sendRequest("endMeeting");
         }
+
+        document.getElementById("addAttendee").addEventListener('click', function() {
+            const attendeesDiv = document.getElementById("attendees");
+
+            const inputRow = document.createElement('div')
+            inputRow.className = "input-row";
+
+            const nameInput = document.createElement('input');
+            nameInput.placeholder = "참석자 이름";
+            nameInput.required = true;
+
+            const positionSelect = document.createElement('select');
+            const positions = ['직급 선택', '사원', '대리', '과장', '차장', '부장'];
+            positions.forEach(position => {
+                const option = document.createElement('option');
+                option.value = position;
+                option.textContent = position;
+                positionSelect.appendChild(option);
+            });
+
+            const emailInput = document.createElement('input');
+            emailInput.placeholder = "참석자 이메일주소";
+            emailInput.type = "email";
+            emailInput.required = true;
+
+            inputRow.appendChild(nameInput);
+            inputRow.appendChild(positionSelect);
+            inputRow.appendChild(emailInput);
+
+            attendeesDiv.appendChild(inputRow);
+        });
     </script>
 </body>
 </html>
