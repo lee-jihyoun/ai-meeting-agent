@@ -7,8 +7,8 @@
 <body>
     <h2>회의 알림 시스템</h2>
 
-    <button onclick="subscribe()">구독하기</button>
-    <button onclick="unsubscribe()">구독 취소</button>
+    <button onclick="startMeeting()">회의 시작</button>
+    <button onclick="stopMeeting()">회의 종료</button>
 
     <p id="response"></p>
 
@@ -21,7 +21,7 @@
                 },
                 body: JSON.stringify({
                     action: action,
-                    email: "user@example.com"
+                    email: "user@example.com" //TODO : 하드코딩 필요한 값인지 확인할것
                 })
             })
             .then(response => response.json())
@@ -31,12 +31,12 @@
             .catch(error => console.error('Error:', error));
         }
 
-        function subscribe() {
-            sendRequest("subscribe");
+        function startMeeting() {
+            sendRequest("startMeeting");
         }
 
-        function unsubscribe() {
-            sendRequest("unsubscribe");
+        function stopMeeting() {
+            sendRequest("stopMeeting");
         }
     </script>
 </body>
