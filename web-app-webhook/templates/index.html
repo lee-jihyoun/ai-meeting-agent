@@ -103,6 +103,7 @@
     <script>
         const attendees = []; // 참석자 정보를 저장할 배열
 
+        // 회의시작/회의종료 POST 요청 보내는 함수
         function sendRequest(action) {
             const attendeeInputs = document.querySelectorAll('.input-row');
             attendees.length = 0; //배열 초기화
@@ -147,6 +148,7 @@
             sendRequest("endMeeting");
         }
 
+        //'참석자 추가' 버튼 클릭시 입력행 추가 (input, selectbox, input)
         document.getElementById("addAttendee").addEventListener('click', function() {
             const attendeesDiv = document.getElementById("attendees");
 
@@ -178,11 +180,13 @@
             attendeesDiv.appendChild(inputRow);
         });
 
+        // 회의 시작/ 회의 종료 버튼 클릭시 dialog 팝업 띄운다.
         function showDialog(message) {
             document.getElementById('dialogMessage').innerText = message;
             document.getElementById('dialog').style.display = 'flex';
         }
 
+        // display = 'none'; 다이얼로그 상태를 none 으로 설정하여 화면에서 보이지 않게 초기화
         document.getElementById('confirmButton').addEventListener('click', function() {
             document.getElementById('dialog').style.display = 'none';
         });
