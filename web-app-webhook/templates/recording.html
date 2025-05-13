@@ -8,12 +8,86 @@
   <button id="startBtn">회의 시작</button>
   <button id="stopBtn" disabled>회의 종료</button>
 
+  <div id="attendees"></div>
+  <button id="addAttendee">참석자 추가</button>
+
   <script>
     // 버튼 레퍼런스
     const startBtn = document.getElementById('startBtn');
     const stopBtn  = document.getElementById('stopBtn');
 
     let audioCtx, micStream, processor, pcmData = [];
+
+    const attendees = []; // 참석자 정보를 저장할 배열
+
+    // 회의시작/회의종료 POST 요청 보내는 함수
+    function sendRequest(meetingAction) {
+      const attendeeInputs = document.querySelectorAll('.input-row');
+      attendees.length = 0; //배열 초기화
+
+      attendeeInputs.forEach(row => {
+          const name = row.children[0].value;
+          const position = row.children[1].value;
+          const email = row.children[2].value;
+
+          if(name && position !== '직급 선택' && email) { //유효성 검사
+              attendees.push({ name, position, email });
+          }
+      });
+      
+      fetch('/webhook', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              attendees,
+              action: meetingAction,
+              email: "user@example.com" //TODO : 하드코딩 필요한 값인지 확인할것
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          document.getElementById("response").innerText = JSON.stringify(data);
+          // showDialog(`회의 시작 : ${JSON.stringify(data)}`)
+      })
+      .catch(error => {
+          console.error('Error:', error)
+          // showDialog(`오류 : ${JSON.stringify(error)}`)
+      });
+    }
+
+    //'참석자 추가' 버튼 클릭시 입력행 추가 (input, selectbox, input)
+    document.getElementById("addAttendee").addEventListener('click', function() {
+      const attendeesDiv = document.getElementById("attendees");
+
+      const inputRow = document.createElement('div')
+      inputRow.className = "input-row";
+
+      const nameInput = document.createElement('input');
+      nameInput.placeholder = "참석자 이름";
+      nameInput.required = true;
+
+      const positionSelect = document.createElement('select');
+      const positions = ['직급 선택', '전임', '선임','책임'];
+      positions.forEach(position => {
+          const option = document.createElement('option');
+          option.value = position;
+          option.textContent = position;
+          positionSelect.appendChild(option);
+      });
+
+      const emailInput = document.createElement('input');
+      emailInput.placeholder = "참석자 이메일주소";
+      emailInput.type = "email";
+      emailInput.required = true;
+
+      inputRow.appendChild(nameInput);
+      inputRow.appendChild(positionSelect);
+      inputRow.appendChild(emailInput);
+
+      attendeesDiv.appendChild(inputRow);
+    });
 
     startBtn.onclick = async () => {
       // 1. 마이크 스트림 얻기
@@ -31,6 +105,8 @@
       // 3. 연결
       micStream.connect(processor);
       processor.connect(audioCtx.destination);
+
+      sendRequest("startMeeting");
 
       startBtn.disabled = true;
       stopBtn.disabled  = false;
@@ -57,6 +133,9 @@
 
       // 리셋
       pcmData = [];
+
+      sendRequest("endMeeting");
+
       startBtn.disabled = false;
       stopBtn.disabled  = true;
     };
