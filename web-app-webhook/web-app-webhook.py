@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify, render_template
-import requests
+import requests, os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-
-# TODO: .env 에서 받아오는 방식으로 수정 필요
-LOGIC_APP_URL = "https://prod-08.koreacentral.logic.azure.com:443/workflows/3d3954b8179e4085a98c49cba1922ca1/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=Wt0QxuwWN9wn3tspR80nslavA3KZtDzZVvI2JL5j_kM";
+load_dotenv()
+LOGIC_APP_URL = os.getenv("LOGIC_APP_URL")
 
 @app.route('/')
 def index():
