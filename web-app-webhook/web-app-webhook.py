@@ -20,29 +20,51 @@ def api_endpoint():
 def webhook_handler():
     # 요청 데이터(JSON)를 가져옴
     data = request.get_json()
+    print("webhook_handler data : ", data)
 
     # 예외 처리: 데이터가 없거나 "action"이 없을 경우 오류 반환
     if not data or "action" not in data:
         return jsonify({"error": "Missing action parameter"}), 400
+        print("webhook_handler 2 data : ", data)
+    print("webhook_handler 3 data : ", data)  
 
     # action 값을 가져옴
     action = data.get("action")
     email = data.get("email")
     attendees = data.get("attendees")
 
+    print(f"webhook_handler action : {action}")
+    print(f"webhook_handler email : {email}")
+    print(f"webhook_handler attendees : {attendees}")
+
     # external_url = "http://localhost:5000/api"
     external_data = {
         'action': action,
         'email': email,
-        'event': "meeting_started",
-        'EmailSent': False
+        'attendees': attendees
+        # 'event': "meeting_started",
+        # 'EmailSent': False
     }
 
-    headers = {'Content-Type': 'application/json; charset=utf-8'}
+    print("webhook_handler external_data : ", external_data)
+
+    # headers = {'Content-Type': 'application/json; charset=utf-8'}
+    headers = {"Content-Type": "application/json"}
 
     # external_response = requests.post(external_url, json=external_data, headers=headers)
-    external_response = requests.post(LOGIC_APP_URL, json=external_data, verify=False, cert='/path/to/cert.pem')
-
+    # external_response = requests.post(LOGIC_APP_URL, json=external_data, verify=False, cert='/path/to/cert.pem')
+    # external_response = requests.post(LOGIC_APP_URL, json=external_data)
+    try : 
+        # external_response = requests.post(LOGIC_APP_URL, json=external_data, headers=headers)
+        # external_response = requests.post(LOGIC_APP_URL, json=external_data, headers=headers, verify=False, cert='/path/to/cert.pem')
+        external_response = requests.post(LOGIC_APP_URL, json=external_data, headers=headers, verify=False)
+        
+        print("webhook_handler Status Code:", external_response.status_code)
+        print("webhook_handler Response Body:", external_response.text)
+        print("webhook_handler 4 external_response : ", external_response) 
+    
+    except requests.exceptions.RequestException as e:
+        print("webhook_handler 웹 요청 중 오류 발생:", e)
 
     if external_response.status_code == 200:
         response_data = json.loads(external_response.text)
@@ -60,6 +82,7 @@ def webhook_handler():
         
         # return jsonify(response_data)
 
+    return external_response.text
     
 
 def process_start_meeting(email, attendees):
@@ -69,4 +92,5 @@ def process_end_meeting(email):
     return jsonify({"status": "endMeeting", "email": email})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host='0.0.0.0', port='9090')
