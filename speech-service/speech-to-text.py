@@ -21,7 +21,7 @@ audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
 
 # Speech Recognizer 객체 생성
 speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
-
+##
 
 # 결과 수신 핸들러
 def recognized_handler(evt):
