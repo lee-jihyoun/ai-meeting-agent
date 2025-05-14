@@ -56,4 +56,4 @@ def process_end_meeting(email):
     return jsonify({"status": "endMeeting", "email": email})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='9090')
+    app.run(host='0.0.0.0', port='80')
