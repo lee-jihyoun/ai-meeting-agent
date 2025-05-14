@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import time
 from datetime import datetime
 import json
+from azure.storage.blob import BlobServiceClient
 
 load_dotenv()
 
@@ -122,3 +123,24 @@ with open(f"../speech-service/{output_dir}/meeting_transcript.txt", "w", encodin
     f.write(meeting_transcript)
 
 print("회의 텍스트 추출 완료")
+
+
+# # # [Step4] 회의 txt 파일을 blob storage에 업로드
+
+# Azure Storage 연결 문자열과 컨테이너 이름
+connection_string = os.getenv("BLOB_CONNECTION_STRING")
+container_name = "meeting-text"
+local_file_path = f"../speech-service/{output_dir}/meeting_transcript.txt"   # 업로드할 파일 경로
+blob_name = f"{today_str}_meeting.txt"           # Blob에 저장될 파일 이름
+
+# BlobServiceClient 생성
+blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+
+# 컨테이너의 BlobClient 생성
+blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+# 파일 업로드
+with open(local_file_path, "rb") as data:
+    blob_client.upload_blob(data, overwrite=True)  # overwrite=True로 덮어쓰기 허용
+
+print(f"'{local_file_path}' 파일이 '{container_name}' 컨테이너에 '{blob_name}' 이름으로 업로드되었습니다.")
