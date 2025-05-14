@@ -3,35 +3,151 @@
 <head>
   <meta charset="UTF-8">
   <title>Plamingo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    textarea { width: 100%; height: 120px; }
+    .row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .scroll-container { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
+    #timerDisplay { font-size: 20px; font-weight: bold; }
+    button { padding: 10px; margin-top: 10px; cursor: pointer; }
+  </style>
 </head>
 <body>
+  <h1>Plamingo</h1>
+
+  <label>제목: <input type="text" id="title" required></label><br><br>
+  <label>내용: <textarea id="content" rows="6" required></textarea></label><br><br>
+
+  <h3>작성자</h3>
+  <div class="row">
+      <input type="text" id="authorName" placeholder="이름" required>
+      <select id="authorPosition">
+          <option>직급 선택</option>
+          <option>전임</option>
+          <option>선임</option>
+          <option>책임</option>
+      </select>
+      
+      <input type="email" placeholder="이메일" required>
+  </div>
+
+  <h3>참석자</h3>
+  <div class="scroll-container" id="attendees">
+      <div class="row">
+          <input type="text" placeholder="이름">
+          <select>
+              <option>직급 선택</option>
+              <option>전임</option>
+              <option>선임</option>
+              <option>책임</option>
+          </select>
+          <input type="text" id="authorRole" placeholder="역할">
+          <button class="toggle-btn" onclick="addAttendeeRow(this)">+</button>
+      </div>
+  </div>
+
+  <p>경과시간: <span id="timerDisplay">00:00:00</span></p>
+
   <button id="startBtn">회의 시작</button>
   <button id="stopBtn" disabled>회의 종료</button>
 
-  <div id="attendees"></div>
-  <button id="addAttendee">참석자 추가</button>
+  <div id="response"></div>
+  <!-- <button id="addAttendee">참석자 추가</button> -->
 
   <script>
-    // 버튼 레퍼런스
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn  = document.getElementById('stopBtn');
-
+    let timerInterval;
+    let startTime;
     let audioCtx, micStream, processor, pcmData = [];
+    const attendees = [];
 
-    const attendees = []; // 참석자 정보를 저장할 배열
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 1000);
+      document.getElementById("startBtn").disabled = true;
+      document.getElementById("stopBtn").disabled = false;
+    }
 
-    // 회의시작/회의종료 POST 요청 보내는 함수
+    function updateTimer() {
+      let elapsed = Math.floor((Date.now() - startTime) / 1000);
+      let hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+      let minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+      let seconds = String(elapsed % 60).padStart(2, '0');
+      document.getElementById("timerDisplay").innerText = `${hours}:${minutes}:${seconds}`;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      document.getElementById("stopBtn").disabled = true;
+    }
+
+    async function getMicStream() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      micStream = audioCtx.createMediaStreamSource(stream);
+      return stream;
+    }
+
+    function connectProcessor() {
+      processor = audioCtx.createScriptProcessor(4096, 1, 1);
+      processor.onaudioprocess = e => {
+        pcmData.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+      };
+      micStream.connect(processor);
+      processor.connect(audioCtx.destination);
+    }
+
+    function mergeBuffers(chunks) {
+      let length = chunks.reduce((sum, c) => sum + c.length, 0);
+      const result = new Float32Array(length);
+      let offset = 0;
+      chunks.forEach(chunk => {
+        result.set(chunk, offset);
+        offset += chunk.length;
+      });
+      return result;
+    }
+
+    function encodeWAV(samples, sampleRate) {
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, samples.length * 2, true);
+      let offset = 44;
+      for (let i = 0; i < samples.length; i++, offset += 2) {
+        let s = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+      return new Blob([view], { type: 'audio/wav' });
+    }
+
+    function writeString(view, offset, str) {
+      for (let i = 0; i < str.length; i++) {
+        view.setUint8(offset + i, str.charCodeAt(i));
+      }
+    }
+
     function sendRequest(meetingAction) {
       const attendeeInputs = document.querySelectorAll('.input-row');
-      attendees.length = 0; //배열 초기화
+      attendees.length = 0; // 배열 초기화
 
       attendeeInputs.forEach(row => {
           const name = row.children[0].value;
           const position = row.children[1].value;
-          const email = row.children[2].value;
+          const authorRole = row.children[2].value;
 
-          if(name && position !== '직급 선택' && email) { //유효성 검사
-              attendees.push({ name, position, email });
+          if(name && position !== '직급 선택' && authorRole) { // 유효성 검사
+              attendees.push({ name, position, authorRole });
           }
       });
       
@@ -43,162 +159,71 @@
           body: JSON.stringify({
               attendees,
               action: meetingAction,
-              email: "user@example.com" //TODO : 하드코딩 필요한 값인지 확인할것
+              email: "user@example.com" // TODO: 하드코딩 필요한 값인지 확인할 것
           })
       })
       .then(response => response.json())
       .then(data => {
           document.getElementById("response").innerText = JSON.stringify(data);
-          // showDialog(`회의 시작 : ${JSON.stringify(data)}`)
       })
       .catch(error => {
-          console.error('Error:', error)
-          // showDialog(`오류 : ${JSON.stringify(error)}`)
+          console.error('Error:', error);
       });
     }
 
-    //'참석자 추가' 버튼 클릭시 입력행 추가 (input, selectbox, input)
-    document.getElementById("addAttendee").addEventListener('click', function() {
-      const attendeesDiv = document.getElementById("attendees");
-
-      const inputRow = document.createElement('div')
-      inputRow.className = "input-row";
-
-      const nameInput = document.createElement('input');
-      nameInput.placeholder = "참석자 이름";
-      nameInput.required = true;
-
-      const positionSelect = document.createElement('select');
-      const positions = ['직급 선택', '전임', '선임','책임'];
-      positions.forEach(position => {
-          const option = document.createElement('option');
-          option.value = position;
-          option.textContent = position;
-          positionSelect.appendChild(option);
-      });
-
-      const emailInput = document.createElement('input');
-      emailInput.placeholder = "참석자 이메일주소";
-      emailInput.type = "email";
-      emailInput.required = true;
-
-      inputRow.appendChild(nameInput);
-      inputRow.appendChild(positionSelect);
-      inputRow.appendChild(emailInput);
-
-      attendeesDiv.appendChild(inputRow);
+    document.getElementById("startBtn").addEventListener("click", async () => {
+      const stream = await getMicStream();
+      connectProcessor();
+      startTimer();
+      sendRequest("startMeeting");
     });
 
-    startBtn.onclick = async () => {
-      // 1. 마이크 스트림 얻기
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      micStream = audioCtx.createMediaStreamSource(stream);
-
-      // 2. ScriptProcessorNode 생성 (버퍼 크기 4096 샘플)
-      processor = audioCtx.createScriptProcessor(4096, 1, 1);
-      processor.onaudioprocess = e => {
-        // 채널 0의 Float32Array PCM 샘플 복사
-        pcmData.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-      };
-
-      // 3. 연결
-      micStream.connect(processor);
-      processor.connect(audioCtx.destination);
-
-      sendRequest("startMeeting");
-
-      startBtn.disabled = true;
-      stopBtn.disabled  = false;
-    };
-
-    stopBtn.onclick = () => {
-      // 1. 연결 끊기
+    document.getElementById("stopBtn").addEventListener("click", () => {
       processor.disconnect();
       micStream.disconnect();
-
-      // 2. PCM 버퍼 합치기
       const merged = mergeBuffers(pcmData);
       const wavBlob = encodeWAV(merged, audioCtx.sampleRate);
 
-      // 3. 파일 다운로드
       const url = URL.createObjectURL(wavBlob);
-      const a   = document.createElement('a');
+      const a = document.createElement('a');
       a.style.display = 'none';
-      a.href       = url;
-      a.download   = `meeting_${Date.now()}.wav`;
+      a.href = url;
+      a.download = `meeting_${Date.now()}.wav`;
       document.body.appendChild(a);
       a.click();
       URL.revokeObjectURL(url);
 
-      // 리셋
       pcmData = [];
-
       sendRequest("endMeeting");
+      stopTimer();
+      document.getElementById("startBtn").disabled = false;
+    });
 
-      startBtn.disabled = false;
-      stopBtn.disabled  = true;
-    };
-
-    // Float32Array 배열을 하나로 합치는 함수
-    function mergeBuffers(chunks) {
-      let length = 0;
-      chunks.forEach(c => length += c.length);
-      const result = new Float32Array(length);
-      let offset = 0;
-      for (const chunk of chunks) {
-        result.set(chunk, offset);
-        offset += chunk.length;
+    function addAttendeeRow(button) {
+      const row = button.parentElement;
+      if (button.textContent === '+') {
+        const newRow = document.createElement('div');
+        newRow.className = "input-row row";
+        newRow.innerHTML = `
+          <input type="text" placeholder="이름">
+          <select>
+              <option>직급 선택</option>
+              <option>전임</option>
+              <option>선임</option>
+              <option>책임</option>
+          </select>
+          <input type="text" placeholder="이메일" required>
+          <button class="toggle-btn" onclick="removeAttendeeRow(this)">-</button>
+        `;
+        document.getElementById("attendees").appendChild(newRow);
+      } else {
+        removeAttendeeRow(button);
       }
-      return result;
     }
 
-    // PCM Float32Array → WAV Blob 인코더
-    function encodeWAV(samples, sampleRate) {
-      const buffer = new ArrayBuffer(44 + samples.length * 2);
-      const view   = new DataView(buffer);
-
-      /* RIFF identifier */
-      writeString(view, 0, 'RIFF');
-      /* file length */
-      view.setUint32(4, 36 + samples.length * 2, true);
-      /* RIFF type */
-      writeString(view, 8, 'WAVE');
-      /* format chunk identifier */
-      writeString(view, 12, 'fmt ');
-      /* format chunk length */
-      view.setUint32(16, 16, true);
-      /* sample format (raw) */
-      view.setUint16(20, 1, true);
-      /* channel count */
-      view.setUint16(22, 1, true);
-      /* sample rate */
-      view.setUint32(24, sampleRate, true);
-      /* byte rate (sampleRate * blockAlign) */
-      view.setUint32(28, sampleRate * 2, true);
-      /* block align (channelCount * bytesPerSample) */
-      view.setUint16(32, 2, true);
-      /* bits per sample */
-      view.setUint16(34, 16, true);
-      /* data chunk identifier */
-      writeString(view, 36, 'data');
-      /* data chunk length */
-      view.setUint32(40, samples.length * 2, true);
-
-      // PCM samples (16-bit little endian)
-      let offset = 44;
-      for (let i = 0; i < samples.length; i++, offset += 2) {
-        let s = Math.max(-1, Math.min(1, samples[i]));
-        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-      }
-
-      return new Blob([view], { type: 'audio/wav' });
-    }
-
-    function writeString(view, offset, str) {
-      for (let i = 0; i < str.length; i++) {
-        view.setUint8(offset + i, str.charCodeAt(i));
-      }
+    function removeAttendeeRow(button) {
+      const row = button.parentElement;
+      document.getElementById("attendees").removeChild(row);
     }
   </script>
 </body>
