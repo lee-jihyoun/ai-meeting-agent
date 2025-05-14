@@ -15,5 +15,6 @@ venv/
 ocr-service/docs/
 
 # 파일 관련
+speech-service/audio/
+speech-service/output/
 *.wav
-output.txt
