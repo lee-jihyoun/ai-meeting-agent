@@ -1,0 +1,124 @@
+import os
+import requests
+from dotenv import load_dotenv
+import time
+from datetime import datetime
+import json
+
+load_dotenv()
+
+speech_key = os.getenv("AI_SERVICE_KEY")
+region = os.getenv("AI_SERVICE_REGION")
+endpoint = os.getenv("AI_BATCH_TRANSCRIPTION_ENDPOINT")
+
+# # # [Step1] blob storage에 업로드된 음성 파일을 batch_transcription_api에 요청
+
+# 1. Azure Blob Storage URL에 업로드된 음성 파일의 SAS URL 필요
+recording_url = os.getenv("AUDIO_BLOB_SAS_URL")
+
+# 2. 전사 요청 payload
+payload = {
+    "displayName": "회의녹음_전사",
+    "description": "회의 전사 작업",
+    "locale": "ko-KR",
+    "contentUrls": [recording_url],
+    "model": None,  # 커스텀 모델이 있으면 넣기
+    "properties": {
+        "punctuationMode": "DictatedAndAutomatic",
+        "profanityFilterMode": "Masked",
+        "diarizationEnabled": True  # 화자 구분. True일때 대사 중복으로 안들어감
+    }
+}
+
+headers = {
+    "Ocp-Apim-Subscription-Key": speech_key,
+    "Content-Type": "application/json"
+}
+
+# 전사 요청을 보냄
+response = requests.post(endpoint, json=payload, headers=headers)
+print(response.status_code)
+response_json = response.json()
+print(response_json)
+
+# # # [Step2] batch_transcription_api의 응답을 json 파일로 저장
+# transcriptionId를 응답에서 추출
+transcription_id = response_json.get("self").split("transcriptions/")[1]
+
+# 오늘 날짜의 디렉토리 생성
+# 오늘 날짜를 YYYY-MM-DD 형식으로 문자열 생성
+today_str = datetime.now().strftime("%Y-%m-%d")
+
+# output_test/2025-05-14 형식의 경로 생성
+output_dir = os.path.join("output", today_str)
+
+# 디렉토리 생성 (이미 존재해도 에러 발생하지 않음)
+os.makedirs(output_dir, exist_ok=True)
+
+if not transcription_id:
+    print("전사 작업 ID를 가져올 수 없습니다.")
+else:
+    # 상태 확인을 위한 엔드포인트
+    status_endpoint = f"{endpoint}/{transcription_id}"
+
+    headers = {
+        "Ocp-Apim-Subscription-Key": speech_key
+    }
+
+    # 전사 작업 상태 확인
+    while True:
+        response = requests.get(status_endpoint, headers=headers)
+        result = response.json()
+        status = result.get("status")
+        print("현재 상태:", status)
+
+        if status in ["Succeeded", "Failed"]:
+            print("최종 상태 도달:", status)
+            files_url = f"https://koreacentral.api.cognitive.microsoft.com/speechtotext/v3.1/transcriptions/{transcription_id}/files"
+
+            response = requests.get(files_url, headers=headers)
+            files_info = response.json()
+            print(files_info)
+
+            content_urls = [item["links"]["contentUrl"] for item in files_info["values"]]
+
+            # 결과 출력
+            for idx, url in enumerate(content_urls):
+                # 파일명 구분 (contenturl_0.json, report.json)
+                file_name = f"transcription_{idx}.json" if "report" not in url else "transcription_report.json"
+
+                response = requests.get(url)
+                if response.status_code == 200:
+                    with open(f"../speech-service/{output_dir}/{file_name}", "wb") as f:
+                        f.write(response.content)
+                    print(f"다운로드 완료: {file_name}")
+                else:
+                    print(f"다운로드 실패: {url}")
+
+            break
+
+        time.sleep(10)  # 10초마다 상태 확인
+
+time.sleep(10)
+
+
+# # # [Step3] json 파일에서 대사만 추출하여 파일로 저장
+
+# transcription_0.json 파일 로드
+with open(f"../speech-service/{output_dir}/transcription_0.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+full_text = []
+
+# 각 구절(phrase)에서 텍스트 추출
+for phrase in data["recognizedPhrases"]:
+    if phrase["recognitionStatus"] == "Success":
+        for nbest in phrase["nBest"]:
+            full_text.append(nbest["display"])  # display 필드 사용
+
+# 결과 저장
+meeting_transcript = "\n".join(full_text)
+with open(f"../speech-service/{output_dir}/meeting_transcript.txt", "w", encoding="utf-8") as f:
+    f.write(meeting_transcript)
+
+print("회의 텍스트 추출 완료")
