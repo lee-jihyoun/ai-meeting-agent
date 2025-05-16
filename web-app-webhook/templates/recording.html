@@ -142,7 +142,7 @@
   </div>
 
   <button id="startBtn">회의 시작</button>
-  <button id="stopBtn" disabled>회의 종료</button>
+  <button id="stopBtn" style="display: none;">회의 종료</button>
 
   <div id="response"></div>
 
@@ -155,8 +155,8 @@
     function startTimer() {
       startTime = Date.now();
       timerInterval = setInterval(updateTimer, 1000);
-      document.getElementById("startBtn").disabled = true;
-      document.getElementById("stopBtn").disabled = false;
+      document.getElementById("startBtn").style.display = "none";
+      document.getElementById("stopBtn").style.display = "inline-block";
     }
 
     function updateTimer() {
@@ -169,7 +169,7 @@
 
     function stopTimer() {
       clearInterval(timerInterval);
-      document.getElementById("stopBtn").disabled = true;
+      document.getElementById("stopBtn").style.display = "none";
     }
 
     async function getMicStream() {
@@ -288,7 +288,7 @@
       pcmData = [];
       sendRequest("endMeeting");
       stopTimer();
-      document.getElementById("startBtn").disabled = false;
+      document.getElementById("startBtn").style.display = "inline-block";
     });
 
     function addAttendeeRow(button) {
