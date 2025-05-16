@@ -43,9 +43,19 @@
       border: 1px solid #ccc;
     }
 
-    h3, span {
-      justify-content: flex-start; 
-      text-align: start; /* 텍스트 왼쪽 정렬 */
+    h3 {
+      flex: 0 0 20%; /* 20%의 너비를 차지하도록 설정 */
+      text-align: left; /* 텍스트 왼쪽 정렬 */
+    }
+
+    .row, .scroll-container {
+      flex: 1; /* 나머지 공간을 차지하도록 설정 */
+    }
+
+    #timerDisplay {
+      flex: 1;
+      text-align: center;
+      font-size: 60px;
     }
     
     /* 기본 버튼 스타일 */
@@ -105,7 +115,7 @@
   </div>
 
   <div class="container">
-    <h3>작성자: </h3>
+    <h3><label>작성자: </label></h3>
     <div class="row">
         <input type="text" id="authorName" placeholder="이름" required>
         <select id="authorPosition">
@@ -120,7 +130,7 @@
   </div>
 
   <div class="container">
-    <h3>참석자: </h3>
+    <h3><label>참석자: </label></h3>
     <div class="scroll-container" id="attendees">
         <div class="row">
             <input type="text" placeholder="이름">
@@ -137,7 +147,7 @@
   </div>
 
   <div class="container">
-    <h3>경과시간: </h3>
+    <h3><label>경과시간: </label></h3>
     <span id="timerDisplay">00:00:00</span>
   </div>
 
