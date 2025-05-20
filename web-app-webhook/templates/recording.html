@@ -24,7 +24,7 @@
     .scroll-container { 
       max-height: 150px; 
       overflow-y: auto; 
-      border: 1px solid #ccc; 
+      border: 1px solid #FFF; 
       padding: 10px; 
       border-radius: 10px;
     }
@@ -53,6 +53,7 @@
       border-radius: 10px;
       padding: 5px;
       border: 1px solid #ccc;
+      font-family: Arial, sans-serif;
     }
 
     h3 {
@@ -62,6 +63,10 @@
 
     .row, .scroll-container {
       flex: 1; /* 나머지 공간을 차지하도록 설정 */
+    }
+
+    .fixed-label {
+      position: fixed, sticky; /* 고정 위치 설정 */
     }
 
     #timerDisplay {
@@ -124,7 +129,7 @@
     /* 공통 : 회의시작, 회의종료 */
     #startBtn, #stopBtn {
       width: 150px;
-      height: 70px;
+      height: 60px;
       border-radius: 10px;
       color: white;
       border: none;
@@ -145,16 +150,16 @@
   <h1>Plamingo</h1>
 
   <div class="container">
-    <h3><label>회의 제목: </label></h3>
+    <h3><label>회의 제목 </label></h3>
     <input type="text" id="title" required><br><br><!-- 회의 제목 입력 필드 -->
   </div>
   <div class="container">
-    <h3><label>회의 내용: </label></h3>
-    <textarea id="content" rows="2"></textarea><br><br><!-- 회의 내용 입력 필드 -->
+    <h3><label>회의 내용 </label></h3>
+    <textarea id="content" rows="4"></textarea><br><br><!-- 회의 내용 입력 필드 -->
   </div>
 
   <div class="container">
-    <h3><label>작성자: </label></h3>
+    <h3><label>작성자 </label></h3>
     <div class="row">
         <input type="text" id="authorName" placeholder="이름" required><!-- 작성자 이름 입력 필드 -->
         <select id="authorPosition"><!-- 작성자 직급 선택 필드 -->
@@ -169,7 +174,7 @@
   </div>
 
   <div class="container">
-    <h3><label>참석자: </label></h3>
+    <h3><label class="fixed-label">참석자 </label></h3>
     <div class="scroll-container" id="attendees"><!-- 참석자 입력 필드 -->
         <div class="row">
             <input type="text" placeholder="이름"><!-- 참석자 이름 입력 필드 -->
@@ -185,10 +190,14 @@
     </div>
   </div>
 
+  <br>
+  <br>
   <div class="container">
-    <h3><label>경과시간: </label></h3>
+    <h3><label>경과시간 </label></h3>
     <span id="timerDisplay">00:00:00</span><!-- 경과 시간 표시-->
   </div>
+  <br>
+  <br>
 
   <div class="container">
     <button id="startBtn">회의 시작</button><!-- 회의 시작 버튼 -->
