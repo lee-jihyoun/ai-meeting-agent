@@ -17,7 +17,7 @@ audio_files = [f for f in os.listdir(downloads_dir) if f.lower().endswith('.wav'
 # print(audio_files)
 
 # 오늘 날짜를 YYYY-MM-DD 형식으로 문자열 생성
-today_str = datetime.now().strftime("%Y-%m-%d")
+# today_str = datetime.now().strftime("%Y-%m-%d")
 
 
 # # # [Step 2] audio 파일을 blob storage에 업로드하기
@@ -33,7 +33,7 @@ for audio in audio_files:
     filename, ext = os.path.splitext(audio)
     print(f"{audio} 파일을 blob storage에 업로드합니다.")
     # Blob에 저장될 파일 이름
-    blob_audio_name = f"{today_str}_{filename}.wav"
+    blob_audio_name = f"{filename}.wav"
     # 컨테이너의 BlobClient 생성
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_audio_name)
     with open(f"{downloads_dir}/{audio}", "rb") as data:
