@@ -153,8 +153,15 @@ def upload_txt_to_blob(today_str, output_dir, info):
     # txt 파일 업로드
     with open(local_file_path, "rb") as data:
         blob_client.upload_blob(data, overwrite=True)  # overwrite=True로 덮어쓰기 허용
-
     print(f"{local_file_path} 파일이 {container_name} 컨테이너에 {blob_name} 이름으로 업로드되었습니다.")
 
-    blob_client.upload_blob(info, overwrite=True)
-    print(f"info 파일이 {container_name} 컨테이너에 {blob_name} 이름으로 업로드되었습니다.")
+    # info.json 업로드
+    info_json = json.dumps(info, ensure_ascii=False)
+    blob_client_json = blob_service_client.get_blob_client(container=container_name, blob='info.json')
+    blob_client_json.upload_blob(info_json, overwrite=True)
+    print(f"info 파일이 {container_name} 컨테이너에 info.json 이름으로 업로드되었습니다.")
+
+    # blob storage 조회
+    # blobs = blob_service_client.get_container_client(container_name).list_blobs()
+    # for blob in blobs:
+    #     print(blob.name)

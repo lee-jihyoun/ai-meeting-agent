@@ -28,9 +28,3 @@ for audio in audio_files:
 
     # 4. txt 파일을 blob 업로드
     upload_txt_to_blob(today_str, output_dir, info)
-
-
-# TODO: flask로 api 개발.
-# reqest: info json 안에 프론트에서 받는 모든 값이 포함되어 있어야 함.
-# main.py api의 역할은 .wav를 .txt로 변환하는 것
-# response를 주지 않고, blob에 txt와 info json 또는 txt 로 같이 올리기.
