@@ -13,10 +13,10 @@ upload_audio_to_blob(audio_files, downloads_dir, container_name)
 
 # 2. sas url 생성
 for audio in audio_files:
-    sas_url = generate_sas(container_name, audio)
+    blob_url, sas_url = generate_sas(container_name, audio)
 
     # 3. batch_transcription_api를 사용하여 음성파일을 txt로 변환
-    response_json = req_batch_transcription_api(sas_url)
+    response_json = req_batch_transcription_api(blob_url, sas_url)
 
     try:
         today_str, output_dir = save_response_to_json(response_json)
