@@ -39,7 +39,7 @@ def transcribe():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)  # 8080 포트에서 모든 IP로 접근 허용
 
 # TODO: flask로 api 개발.
 # response를 주지 않고, blob에 txt와 info json 또는 txt 로 같이 올리기.
