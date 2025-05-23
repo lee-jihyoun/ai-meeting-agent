@@ -1,4 +1,6 @@
 import os
+import time
+
 from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
 from datetime import datetime
@@ -11,17 +13,17 @@ def get_wav_list():
     # 사용자의 홈 디렉터리 경로 얻기
     home_dir = os.path.expanduser('~')
 
-    # Downloads 폴더 경로 만들기
+    # Downloads 폴더 경로
     downloads_dir = os.path.join(home_dir, 'Downloads')
 
     # Downloads 폴더에서 .wav 파일만 리스트로 가져오기
-    audio_files = [f for f in os.listdir(downloads_dir) if f.lower().endswith('.wav') and f.lower().startswith('plamingo_meeting')]
-    # print(audio_files)
-
-    # 오늘 날짜를 YYYY-MM-DD 형식으로 문자열 생성
-    # today_str = datetime.now().strftime("%Y-%m-%d")
-
-    return audio_files, downloads_dir
+    while True:
+        audio_files = [f for f in os.listdir(downloads_dir) if f.lower().endswith('.wav') and f.lower().startswith('plamingo_meeting')]
+        if audio_files:
+            return audio_files, downloads_dir
+        else:
+            print('.wav 파일이 존재하지 않습니다. 10초 뒤에 다시 탐색합니다.')
+            time.sleep(10)
 
 
 # # # [Step 2] audio 파일을 blob storage에 업로드하기
