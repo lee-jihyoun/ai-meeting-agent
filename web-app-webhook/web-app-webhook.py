@@ -15,17 +15,17 @@ def webhook_handler():
     # 요청 데이터(JSON)를 가져옴
     data = request.get_json()
 
-    # 예외 처리: 데이터가 없거나 "action"이 없을 경우 오류 반환
-    if not data or "action" not in data:
-        return jsonify({"error": "Missing action parameter"}), 400
+    # 예외 처리: 데이터가 없거나 "actmeetingActionion"이 없을 경우 오류 반환
+    if not data or "meetingAction" not in data:
+        return jsonify({"error": "Missing meetingAction parameter"}), 400
 
-    # action 값을 가져옴
-    action = data.get("action")
+    # meetingAction 값을 가져옴
+    meetingAction = data.get("meetingAction")
     email = data.get("email")
     attendees = data.get("attendees")
 
     external_data = {
-        'action': action,
+        'meetingAction': meetingAction,
         'email': email,
         'attendees': attendees
     }
@@ -39,13 +39,13 @@ def webhook_handler():
 
     if external_response.status_code == 200:
         response_data = json.loads(external_response.text)
-        # action 값에 따라 분기 처리
-        if action == "startMeeting":
+        # meetingAction 값에 따라 분기 처리
+        if meetingAction == "startMeeting":
             return process_start_meeting(email, attendees)
-        elif action == "endMeeting":
+        elif meetingAction == "endMeeting":
             return process_end_meeting(email)
         else:
-            return jsonify({"error": "Invalid action type"}), 400
+            return jsonify({"error": "Invalid meetingAction type"}), 400
         
     return external_response.text    
 
