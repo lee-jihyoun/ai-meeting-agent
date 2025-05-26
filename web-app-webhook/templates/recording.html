@@ -151,40 +151,40 @@
 
   <div class="container">
     <h3><label>회의 제목 </label></h3>
-    <input type="text" id="title" required><br><br><!-- 회의 제목 입력 필드 -->
+    <input type="text" id="meeting-title" required><br><br><!-- 회의 제목 입력 필드 -->
   </div>
   <div class="container">
     <h3><label>회의 내용 </label></h3>
-    <textarea id="content" rows="4"></textarea><br><br><!-- 회의 내용 입력 필드 -->
+    <textarea id="meeting-content" rows="4"></textarea><br><br><!-- 회의 내용 입력 필드 -->
   </div>
 
   <div class="container">
     <h3><label>작성자 </label></h3>
     <div class="row">
-        <input type="text" id="authorName" placeholder="이름" required><!-- 작성자 이름 입력 필드 -->
-        <select id="authorPosition"><!-- 작성자 직급 선택 필드 -->
+        <input type="text" id="writer-name" placeholder="이름" required><!-- 작성자 이름 입력 필드 -->
+        <select id="writer-position"><!-- 작성자 직급 선택 필드 -->
             <option>직급 선택</option>
             <option>전임</option>
             <option>선임</option>
             <option>책임</option>
         </select>
         
-        <input type="email" placeholder="이메일" required><!-- 작성자 이메일 입력 필드 -->
+        <input type="email" id="writer-email" placeholder="이메일" required><!-- 작성자 이메일 입력 필드 -->
     </div>
   </div>
 
   <div class="container">
     <h3><label class="fixed-label">참석자 </label></h3>
     <div class="scroll-container" id="attendees"><!-- 참석자 입력 필드 -->
-        <div class="row">
-            <input type="text" placeholder="이름"><!-- 참석자 이름 입력 필드 -->
-            <select><!-- 참석자 직급 선택 필드 -->
+        <div class="input-row row">
+            <input type="text" class="name-input" placeholder="이름"><!-- 참석자 이름 입력 필드 -->
+            <select class="position-input"><!-- 참석자 직급 선택 필드 -->
                 <option>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
             </select>
-            <input type="text" id="authorRole" placeholder="역할"><!-- 참석자 역할 입력 필드 -->
+            <input type="text" class="role-input" id="authorRole" placeholder="역할"><!-- 참석자 역할 입력 필드 -->
             <button class="fab add-btn" onclick="addAttendeeRow(this)">+</button><!-- 참석자 추가 버튼 -->
         </div>
     </div>
@@ -211,10 +211,13 @@
     let startTime; //회의시작 시간
     let audioCtx, micStream, processor, pcmData = []; // 오디오 처리 관련 변수 
     const attendees = []; //참석자 목록 배열
+    let startTimeConst;
+    let endTimeConst;
 
     // 타이머 시작 함수 
     function startTimer() {
       startTime = Date.now(); // 현재 시간을 시작 시간으로 설정
+      startTimeConst = startTime;
       timerInterval = setInterval(updateTimer, 1000); //1초마다 타이머 업데이트 
       document.getElementById("startBtn").style.display = "none"; //시작 버튼 숨기기 
       document.getElementById("stopBtn").style.display = "inline-block"; //종료 버튼 보이기
@@ -232,6 +235,8 @@
     //타이머 종료 함수
     function stopTimer() {
       clearInterval(timerInterval); //타이머 인터벌 종료
+      endTime = Date.now()
+      endTimeConst = endTime;
       document.getElementById("stopBtn").style.display = "none"; //종료 버튼 숨기기
     }
 
@@ -304,28 +309,83 @@
       attendees.length = 0; // 배열 초기화
 
       attendeeInputs.forEach(row => {
-          const name = row.children[0].value; //이름 가져오기
-          const position = row.children[1].value; //직급 가져오기
-          const authorRole = row.children[2].value; //역할 가져오기
+          const name = row.querySelector('.name-input').value; // 이름 가져오기
+          const position = row.querySelector('.position-input').value; // 직급 가져오기
+          const authorRole = row.querySelector('.role-input').value; // 역할 가져오기
 
           if(name && position !== '직급 선택' && authorRole) { // 유효성 검사
               attendees.push({ name, position, authorRole }); //유효한 참석자를 배열에 추가
+              console.log("sendRequest attendees : ", attendees)
           }
       });
+
+      // 비어 있는 참석자 배열 체크
+      if (attendees.length === 0) {
+        console.warn('No valid attendees provided');
+        document.getElementById("response").innerText = 'Error: No valid attendees provided';
+        return;
+      }
+
+      // const meetingAction = meetingAction;
+      const title = document.getElementById('meeting-title').value;
+      const content = document.getElementById('meeting-content').value;
+      const writerName = document.getElementById('writer-name').value;
+      const writerPosition = document.getElementById('writer-position').value;
+      const writerEmail = document.getElementById('writer-email').value;
+      const startTime = startTimeConst;
+      // const endTime = endTimeConst;
+
+      const info =  {
+        meetingAction: meetingAction,
+        title: title,
+        content : content,
+        writer: [writerName, writerPosition, writerEmail],
+        attendees: attendees,
+        startTime: startTime,
+        // endTime: endTime
+      };
+
+      console.log("sendRequest info : ", info);
+      console.log("sendRequest JSON.stringify(info) : ", JSON.stringify(info));
       
       fetch('/webhook', { //서버 요청
           method: 'POST',
           headers: {
               'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-              attendees,
-              meetingAction: meetingAction,
-              email: "user@example.com" // TODO: 하드코딩 필요한 값인지 확인할 것
-          })
+          body: JSON.stringify(info)
       })
-      .then(response => response.json())
+      // .then(response => response.json())
+      .then(response => {
+        console.log("response : ", response)
+        // 응답 상태 체크
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error("서버 오류:", text); // 서버에서 온 메시지 로그
+                throw new Error("서버 오류: " + text);
+            });
+        }else if(response.ok){
+          console.log(" 성공 info : ", info)
+          console.log(" 성공 response.type : ", response.type )
+          // const result = response.json({
+          //   info : info
+          // });
+          info = request.get_json(force=true)
+          console.log("result : ", info)
+          return result;
+        }
+
+        // 응답이 비어있는 경우 처리
+        return response.text().then(data => {
+            if (data && Object.keys(data).length > 0) {
+                return data; // 데이터가 있을 경우 반환
+            } else {
+                throw new Error("응답이 비어 있습니다."); // 비어 있는 경우 예외를 던지는 처리
+            }
+        });
+      })
       .then(data => {
+          console.log("fetch data", data);
           document.getElementById("response").innerText = JSON.stringify(data);
       })
       .catch(error => {
