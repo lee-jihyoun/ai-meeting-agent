@@ -12,6 +12,8 @@ def index():
 
 @app.route('/webhook', methods=['POST'])
 def webhook_handler():
+
+    info = request.get_json(force=True)
     # 요청 데이터(JSON)를 가져옴
     data = request.get_json()
     print("webhook_handler data : ", data)
@@ -59,7 +61,11 @@ def webhook_handler():
         else:
             return jsonify({"error": "Invalid meetingAction type"}), 400
         
-    return external_response.text    
+    # return external_response.text    
+    return jsonify({
+        "status: ": "ok",
+        "info": info
+    }), 200
 
 def process_start_meeting(writer_email, attendees):
     return jsonify({"status": "startMeeting", "email": writer_email, "attendees" : attendees})
