@@ -17,6 +17,7 @@
     const stopBtn  = document.getElementById('stopBtn');
 
     let audioCtx, micStream, processor, pcmData = [];
+    let stamp = null;
 
     const attendees = []; // 참석자 정보를 저장할 배열
 
@@ -89,7 +90,22 @@
       attendeesDiv.appendChild(inputRow);
     });
 
-    startBtn.onclick = async () => {
+    // 유틸: 로컬 시간 → YYYYMMDD_HHMMSS
+    function formatDateLocal(d) {
+      const z = n => n.toString().padStart(2, '0');
+      return (
+        d.getFullYear().toString() +
+        z(d.getMonth() + 1) +
+        z(d.getDate()) + '_' +
+        z(d.getHours()) +
+        z(d.getMinutes()) +
+        z(d.getSeconds())
+      );
+    }
+
+    startBtn.onclick = async function () {
+      stamp = formatDateLocal(new Date()); // 20250526_095918
+
       // 1. 마이크 스트림 얻기
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -121,14 +137,14 @@
       const merged = mergeBuffers(pcmData);
       const wavBlob = encodeWAV(merged, audioCtx.sampleRate);
 
-      // 3. 파일 다운로드
+      // // 3. 파일 다운로드
       const url = URL.createObjectURL(wavBlob);
       const a   = document.createElement('a');
-      a.style.display = 'none';
-      a.href       = url;
-      a.download   = `meeting_${Date.now()}.wav`;
+      a.href     = url;
+      a.download = `plamingo_meeting_${stamp}.wav`;     // ← 백틱 & 실제 변수
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
       // 리셋
