@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import sys
 import os
 import shutil
 import json
@@ -25,11 +26,16 @@ def transcribe():
 
     # 2. sas url 생성
     for audio in audio_files:
-        sas_url = generate_sas(container_name, audio)
+        blob_url, sas_url = generate_sas(container_name, audio)
 
         # 3. batch_transcription_api를 사용하여 음성파일을 txt로 변환
-        response_json = req_batch_transcription_api(sas_url)
-        today_str, output_dir = save_response_to_json(response_json)
+        response_json = req_batch_transcription_api(blob_url, sas_url)
+        try:
+            today_str, output_dir = save_response_to_json(response_json)
+        except Exception as e:
+            print(e)
+            sys.exit()
+
         save_to_text(output_dir)
 
         # 4. txt 파일을 blob 업로드
