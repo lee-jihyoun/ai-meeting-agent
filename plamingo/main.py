@@ -10,6 +10,7 @@ load_dotenv()
 LOGIC_APP_URL = os.getenv("LOGIC_APP_URL")
 
 
+@app.route('/transcribe', methods=['POST'])
 def transcribe():
     # 0. 변수 정의
     container_name = "meeting-audio"
@@ -58,7 +59,7 @@ def webhook_handler():
 
     try:
         external_response = requests.post(LOGIC_APP_URL, json=info, headers=headers, verify=False)
-        transcribe
+        # transcribe
 
         if external_response.status_code == 200:
             return jsonify({
