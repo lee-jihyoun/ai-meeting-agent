@@ -208,15 +208,14 @@
   <script>
     let timerInterval; //타이머 인터벌 변수 
     let startTime; //회의시작 시간
+    let startTimeFormatted; //회의시작 시간(yyyymmdd)
     let audioCtx, micStream, processor, pcmData = []; // 오디오 처리 관련 변수 
     const attendees = []; //참석자 목록 배열
-    let startTimeConst;
-    let endTimeConst;
 
     // 타이머 시작 함수 
     function startTimer() {
       startTime = Date.now(); // 현재 시간을 시작 시간으로 설정
-      startTimeConst = startTime;
+      startTimeFormatted = formatDateLocal(startTime)
       timerInterval = setInterval(updateTimer, 1000); //1초마다 타이머 업데이트 
       document.getElementById("startBtn").style.display = "none"; //시작 버튼 숨기기 
       document.getElementById("stopBtn").style.display = "inline-block"; //종료 버튼 보이기
@@ -235,8 +234,33 @@
     function stopTimer() {
       clearInterval(timerInterval); //타이머 인터벌 종료
       endTime = Date.now()
-      endTimeConst = endTime;
       document.getElementById("stopBtn").style.display = "none"; //종료 버튼 숨기기
+    }
+
+    // // 시간 변환 함수 (YYYYMMDD_HHMMSS)
+    // function formatDateLocal(d) {
+    //   const z = n => n.toString().padStart(2, '0');
+    //   return (
+    //     d.getFullYear().toString() +
+    //     z(d.getMonth() + 1) +
+    //     z(d.getDate()) + '_' +
+    //     z(d.getHours()) +
+    //     z(d.getMinutes()) +
+    //     z(d.getSeconds())
+    //   );
+    // }
+
+    function formatDateLocal(timestamp) {
+      const date = new Date(timestamp);
+      const z = n => n.toString().padStart(2, '0');
+      return (
+        date.getFullYear().toString() +
+        z(date.getMonth() + 1) +
+        z(date.getDate()) + '_' +
+        z(date.getHours()) +
+        z(date.getMinutes()) +
+        z(date.getSeconds())
+      );
     }
 
     // 마이크 스트림을 가져오는 비동기 함수
@@ -331,8 +355,6 @@
       const writerName = document.getElementById('writer-name').value;
       const writerPosition = document.getElementById('writer-position').value;
       const writerEmail = document.getElementById('writer-email').value;
-      const startTime = startTimeConst;
-      // const endTime = endTimeConst;
 
       const info =  {
         meetingAction: meetingAction,
@@ -340,8 +362,7 @@
         content : content,
         writer: [writerName, writerPosition, writerEmail],
         attendees: attendees,
-        startTime: startTime,
-        // endTime: endTime
+        startTime: startTimeFormatted,
       };
 
       console.log("sendRequest info : ", info);
@@ -385,7 +406,7 @@
       const a = document.createElement('a'); //다운로드 링크 생성
       a.style.display = 'none'; //링크 숨김
       a.href = url; //URL 설정
-      a.download = `meeting_${Date.now()}.wav`; //다운로드 파일 이름 설정
+      a.download = `plamingo_meeting_${startTimeFormatted}.wav`; //다운로드 파일 이름 설정
       document.body.appendChild(a); //링크를 DOM에 추가
       a.click(); // 다운로드 클릭 실행
       URL.revokeObjectURL(url); //URL 해제
