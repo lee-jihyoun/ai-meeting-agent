@@ -12,4 +12,9 @@ venv/
 *.tmp
 
 # 디렉토리 관련
-docs/
+ocr-service/docs/
+
+# 파일 관련
+speech-service/audio/
+speech-service/output/
+*.wav
