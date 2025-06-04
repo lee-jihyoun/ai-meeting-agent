@@ -209,7 +209,7 @@
 
 
   <script>
-    let timerInterval; //타이머 인터벌 변수 
+    let timerInterval = null; //타이머 인터벌 변수 
     let startTime; //회의시작 시간
     let startTimeFormatted; //회의시작 시간(yyyymmdd)
     let audioCtx, micStream, processor, pcmData = []; // 오디오 처리 관련 변수 
@@ -219,7 +219,9 @@
     function startTimer() {
       startTime = Date.now(); // 현재 시간을 시작 시간으로 설정
       startTimeFormatted = formatDateLocal(startTime)
-      timerInterval = setInterval(updateTimer, 1000); //1초마다 타이머 업데이트 
+      if(!timerInterval) { // 이미 타이머가 실행 중인지 확인
+        timerInterval = setInterval(updateTimer, 1000); //1초마다 타이머 업데이트 
+      } 
       document.getElementById("startBtn").style.display = "none"; //시작 버튼 숨기기 
       document.getElementById("stopBtn").style.display = "inline-block"; //종료 버튼 보이기
     }
@@ -235,8 +237,10 @@
 
     //타이머 종료 함수
     function stopTimer() {
-      clearInterval(timerInterval); //타이머 인터벌 종료
-      endTime = Date.now()
+      if (timerInterval) { // timerInterval이 설정되어 있을 때만
+        clearInterval(timerInterval); //타이머 인터벌 종료
+        timerInterval = null; //타이머 상태 초기화
+      }
       document.getElementById("stopBtn").style.display = "none"; //종료 버튼 숨기기
     }
 
@@ -352,7 +356,7 @@
         return;
       }
 
-      // const meetingAction = meetingAction;
+      // const meeting_action = meetingAction;
       const title = document.getElementById('meeting-title').value;
       const content = document.getElementById('meeting-content').value;
       const writerName = document.getElementById('writer-name').value;
