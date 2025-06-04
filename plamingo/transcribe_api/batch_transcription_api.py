@@ -19,21 +19,15 @@ container_name = "meeting-text"
 
 # blob url 사용은 public 으로 열린 경우. sas_url은 sas를 통해서만 사용하는 경우
 # # # [Step1] blob storage에 업로드된 음성 파일을 batch_transcription_api에 요청
-def req_batch_transcription_api(blob_url):
+def req_batch_transcription_api(sas_url):
     # 1. Azure Blob Storage URL에 업로드된 음성 파일의 SAS URL 필요
-    # recording_url = os.getenv("AUDIO_BLOB_SAS_URL")
 
     # 2. 전사 요청 payload
     payload = {
         "displayName": "회의녹음_전사",
         "description": "회의 전사 작업",
         "locale": "ko-KR",
-        "contentUrls": [blob_url],
-        # "contentUrls": [
-        #     #TODO: blob url 만 있으면 서버에 wav 내려받지 않고 바로 api 에 사용할 수 있다고 함!
-        #     "https://<storage_account>.blob.core.windows.net/<container>/<file1>.wav?<SAS_TOKEN>",
-        #     "https://<storage_account>.blob.core.windows.net/<container>/<file2>.wav?<SAS_TOKEN>"
-        # ],
+        "contentUrls": [sas_url], # sas_url로 blob storage에 있는 파일 접근 가능
         "locale": "ko-KR",
         "displayName": "My Transcription",
         "model": None,  # 커스텀 모델이 있으면 넣기
@@ -109,7 +103,7 @@ def save_response_to_json(response_json):
 
                     response = requests.get(url)
                     if response.status_code == 200:
-                        with open(f"../speech-service/{output_dir}/{file_name}", "wb") as f:
+                        with open(f"{output_dir}/{file_name}", "wb") as f:
                             f.write(response.content)
                         print(f"다운로드 완료: {file_name}")
 
@@ -127,7 +121,7 @@ def save_response_to_json(response_json):
 # # # [Step3] json 파일에서 대사만 추출하여 파일로 저장
 def save_to_text(output_dir):
     # transcription_0.json 파일 로드
-    with open(f"../speech-service/{output_dir}/transcription_0.json", "r", encoding="utf-8") as f:
+    with open(f"{output_dir}/transcription_0.json", "r", encoding="utf-8") as f:
         data = json.load(f)
 
     full_text = []
@@ -140,7 +134,7 @@ def save_to_text(output_dir):
 
     # 결과 저장
     meeting_transcript = "\n".join(full_text)
-    with open(f"../speech-service/{output_dir}/meeting_transcript.txt", "w", encoding="utf-8") as f:
+    with open(f"{output_dir}/meeting_transcript.txt", "w", encoding="utf-8") as f:
         f.write(meeting_transcript)
 
     print("회의 텍스트 추출 완료")
@@ -151,7 +145,7 @@ def upload_txt_to_blob(today_str, output_dir, info):
     # BlobServiceClient 생성
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-    local_file_path = f"../speech-service/{output_dir}/meeting_transcript.txt"   # 업로드할 파일 경로
+    local_file_path = f"{output_dir}/meeting_transcript.txt"   # 업로드할 파일 경로
     blob_name = f"{today_str}_meeting.txt"           # Blob에 저장될 파일 이름
 
     # 컨테이너의 BlobClient 생성
