@@ -1,14 +1,14 @@
 body { 
-    font-family: Arial, sans-serif; 
-    margin: 20px; 
-    display: flex;
-    justify-content: center; /* 가로 방향 가운데 정렬 */
-    align-items: center; /* 세로 방향 가운데 정렬 */
-    height: 100vh; /* 화면 전체 높이를 사용 */
-    margin: 0; /* 기본 여백 제거 */
-    flex-direction: column; /* 요소들을 세로로 정렬 */
-}
-
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      display: flex;
+      justify-content: center; /* 가로 방향 가운데 정렬 */
+      align-items: center; /* 세로 방향 가운데 정렬 */
+      height: 100vh; /* 화면 전체 높이를 사용 */
+      margin: 0; /* 기본 여백 제거 */
+      flex-direction: column; /* 요소들을 세로로 정렬 */
+    }
+    
 .row { 
     display: flex; 
     gap: 10px; 
