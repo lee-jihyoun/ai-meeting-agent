@@ -52,25 +52,18 @@ def upload_audio_to_blob(audio_files, downloads_dir, container_name):
         print(f"[{end_time}] {audio} 파일이 {container_name} 컨테이너에 업로드되었습니다.")
 
 
-def generate_sas(container_name, blob_file_name):
-    # SAS 토큰 유효 기간 설정 (예: 1시간)
-    sas_token_expiry = datetime.utcnow() + timedelta(hours=24)
+def download_audio_from_blob(container_name, blob_name, download_file_path):
+    connection_string = os.getenv("BLOB_CONNECTION_STRING")
+    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+    # BlobClient 생성
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
-    # SAS 토큰 생성
-    sas_token = generate_blob_sas(
-        account_name=account_name,
-        container_name=container_name,
-        blob_name=blob_file_name,
-        account_key=account_key,
-        permission=BlobSasPermissions(read=True, list=True),
-        expiry=datetime.utcnow() + timedelta(hours=24),
-        start=datetime.utcnow() - timedelta(minutes=15),  # 시작 시간 15분 전
-        version="2022-11-02"  # 서비스 버전 명시
-    )
+    # WAV 파일 다운로드
+    with open(download_file_path, "wb") as file:
+        download_stream = blob_client.download_blob()
+        file.write(download_stream.readall())
 
-    # Blob URL + SAS 토큰 조합하여 SAS URL 생성
-    blob_url = f"https://{account_name}.blob.core.windows.net/{container_name}/{blob_file_name}"
-    print(blob_url)
-    sas_url = f"{blob_url}?{sas_token}"
-    print("SAS URL:", sas_url)
-    return blob_url, sas_url
+    print(f"WAV 파일이 {download_file_path}로 다운로드되었습니다.")
+
+
+

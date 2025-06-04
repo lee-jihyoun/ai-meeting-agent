@@ -19,7 +19,7 @@ container_name = "meeting-text"
 
 # blob url 사용은 public 으로 열린 경우. sas_url은 sas를 통해서만 사용하는 경우
 # # # [Step1] blob storage에 업로드된 음성 파일을 batch_transcription_api에 요청
-def req_batch_transcription_api(blob_url, sas_url):
+def req_batch_transcription_api(blob_url):
     # 1. Azure Blob Storage URL에 업로드된 음성 파일의 SAS URL 필요
     # recording_url = os.getenv("AUDIO_BLOB_SAS_URL")
 
@@ -29,6 +29,13 @@ def req_batch_transcription_api(blob_url, sas_url):
         "description": "회의 전사 작업",
         "locale": "ko-KR",
         "contentUrls": [blob_url],
+        # "contentUrls": [
+        #     #TODO: blob url 만 있으면 서버에 wav 내려받지 않고 바로 api 에 사용할 수 있다고 함!
+        #     "https://<storage_account>.blob.core.windows.net/<container>/<file1>.wav?<SAS_TOKEN>",
+        #     "https://<storage_account>.blob.core.windows.net/<container>/<file2>.wav?<SAS_TOKEN>"
+        # ],
+        "locale": "ko-KR",
+        "displayName": "My Transcription",
         "model": None,  # 커스텀 모델이 있으면 넣기
         "properties": {
             "punctuationMode": "DictatedAndAutomatic",
