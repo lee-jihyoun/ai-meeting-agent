@@ -144,6 +144,24 @@
       color: white;
     }
 
+    input::placeholder,
+    textarea::placeholder {
+      color: gray; /* 초기 회색 placeholder */
+    }
+
+    select {
+      color: gray; /* select 기본 색상 */
+    }
+
+    input.invalid::placeholder,
+    textarea.invalid::placeholder {
+      color: red; /* invalid 상태의 빨간 placeholder */
+    }
+
+    select.invalid {
+      border-color: red; /* invalid 상태의 빨간 테두리 */
+    }
+
   </style>
 
   <!-- Favicon 설정 : 404 에러 방지-->
@@ -154,25 +172,25 @@
 
   <div class="container">
     <h3><label>회의 제목 </label></h3>
-    <input type="text" id="meeting-title" required><br><br><!-- 회의 제목 입력 필드 -->
+    <input type="text" id="meeting-title" placeholder="회의 제목을 입력하세요." required><br><br><!-- 회의 제목 입력 필드 -->
   </div>
   <div class="container">
     <h3><label>회의 내용 </label></h3>
-    <textarea id="meeting-content" rows="4"></textarea><br><br><!-- 회의 내용 입력 필드 -->
+    <textarea id="meeting-content" rows="4" placeholder="회의 내용을 입력하세요." required></textarea><br><br><!-- 회의 내용 입력 필드 -->
   </div>
 
   <div class="container">
     <h3><label>작성자 </label></h3>
     <div class="row">
-        <input type="text" id="writer-name" placeholder="이름" required><!-- 작성자 이름 입력 필드 -->
-        <select id="writer-position"><!-- 작성자 직급 선택 필드 -->
+        <input type="text" id="writer-name" placeholder="이름 입력" required><!-- 작성자 이름 입력 필드 -->
+        <select id="writer-position" required><!-- 작성자 직급 선택 필드 -->
             <option>직급 선택</option>
             <option>전임</option>
             <option>선임</option>
             <option>책임</option>
         </select>
         
-        <input type="email" id="writer-email" placeholder="이메일" required><!-- 작성자 이메일 입력 필드 -->
+        <input type="email" id="writer-email" placeholder="이메일 입력" required><!-- 작성자 이메일 입력 필드 -->
     </div>
   </div>
 
@@ -180,14 +198,14 @@
     <h3><label class="fixed-label">참석자 </label></h3>
     <div class="scroll-container" id="attendees"><!-- 참석자 입력 필드 -->
         <div class="input-row row">
-            <input type="text" class="name-input" placeholder="이름"><!-- 참석자 이름 입력 필드 -->
-            <select class="position-input"><!-- 참석자 직급 선택 필드 -->
+            <input type="text" class="name-input" placeholder="이름 입력" required><!-- 참석자 이름 입력 필드 -->
+            <select class="position-input" required><!-- 참석자 직급 선택 필드 -->
                 <option>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
             </select>
-            <input type="text" class="role-input" id="authorRole" placeholder="역할"><!-- 참석자 역할 입력 필드 -->
+            <input type="text" class="role-input" id="authorRole" placeholder="역할 입력" required><!-- 참석자 역할 입력 필드 -->
             <button class="fab add-btn" onclick="addAttendeeRow(this)">+</button><!-- 참석자 추가 버튼 -->
         </div>
     </div>
@@ -203,7 +221,7 @@
   <br>
 
   <div class="container">
-    <button id="startBtn">회의 시작</button><!-- 회의 시작 버튼 -->
+    <button id="startBtn" disabled>회의 시작</button><!-- 회의 시작 버튼 -->
     <button id="stopBtn" style="display: none;">회의 종료</button><!-- 회의 종료 버튼 -->
   </div>  
 
@@ -452,6 +470,47 @@
       const row = button.parentElement; //현재 버튼이 속한 부모 요소 선택
       document.getElementById("attendees").removeChild(row); //부모 요소에서 행 제거
     }
+
+    // 필수 입력값 validation check
+    const inputs = document.querySelectorAll('input[required], textarea[required], select[required]');
+    const startBtn = document.getElementById('startBtn');
+    const meetingTitleInput = document.getElementById('meeting-title');
+
+    const validateInputs = () => {
+      let allValid = true;
+      inputs.forEach(input => {
+        if(input.value.trim() === '' || (input.tagName === 'SELECT' && input.selectedIndex === 0)) {
+          input.classList.add('invalid'); // invalid 클래스 추가 
+          allValid = false;
+        } else {
+          input.classList.remove('invalid'); // invalid 클래스 제거
+        }
+      });
+      startBtn.disabled = !allValid; // 모든 input이 유효할 때만 버튼 활성화
+    };
+
+    // 입력 필드 및 select에 이벤트 리스너 추가
+    inputs.forEach(input => {
+      input.addEventListener('input', validateInputs);
+      input.addEventListener('blur', validateInputs);
+      input.addEventListener('change', validateInputs); // select의 변경 처리를 위한 이벤트
+    });
+
+    // 회의 시작 버튼 클릭 이벤트
+    startBtn.addEventListener('click', () => {
+      if(validateInputs()) {
+        alert('회의를 시작합니다.');
+      }
+    });
+
+    // 초기 placeholder 색상으로 설정 (optional)
+    // validateInputs(); // 페이지 로드 시 유효성 검사 실행
+
+    // 페이지 로드 시 회의 제목 input에 포커스 주기
+    window.onload = () => {
+      meetingTitleInput.focus(); //회의 제목 input 에 포커스 
+    }
+
   </script>
 </body>
 </html>
