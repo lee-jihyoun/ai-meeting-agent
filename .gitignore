@@ -18,3 +18,5 @@ ocr-service/docs/
 speech-service/audio/
 speech-service/output/
 *.wav
+*.pem
+*.crt
