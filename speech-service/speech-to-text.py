@@ -22,9 +22,9 @@ def start_speech_recognition():
     # 오디오 소스 설정 (마이크 사용)
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
 
-# Speech Recognizer 객체 생성
-speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
-##
+    # Speech Recognizer 객체 생성
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+
 
     # 결과 수신 핸들러
     def recognized_handler(evt):
