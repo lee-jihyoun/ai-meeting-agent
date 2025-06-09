@@ -9,11 +9,15 @@ body {
     flex-direction: column; /* 요소들을 세로로 정렬 */
 }
 
+
+
 .row { 
     display: flex; 
     gap: 10px; 
     margin-bottom: 10px; 
 }
+
+
 
 .scroll-container { 
     max-height: 150px; 
@@ -90,7 +94,7 @@ h3 {
 .fab:hover {
     transform: scale(1.1);
     box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
-}
+    }
 
 /* 초록색 추가 버튼 */
 .add-btn {
@@ -136,4 +140,22 @@ h3 {
 #startBtn:hover, #stopBtn:hover {
     background-color: black;
     color: white;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: gray; /* 초기 회색 placeholder */
+}
+
+select {
+    color: gray; /* select 기본 색상 */
+}
+
+input.invalid::placeholder,
+textarea.invalid::placeholder {
+    color: red; /* invalid 상태의 빨간 placeholder */
+}
+
+select.invalid {
+    border-color: red; /* invalid 상태의 빨간 테두리 */
 }

@@ -250,3 +250,51 @@ function removeAttendeeRow(button) {
     const row = button.parentElement; //현재 버튼이 속한 부모 요소 선택
     document.getElementById("attendees").removeChild(row); //부모 요소에서 행 제거
 }
+
+// 필수 입력값 validation check
+const inputs = document.querySelectorAll('input[required], textarea[required], select[required]');
+const startBtn = document.getElementById('startBtn');
+const meetingTitleInput = document.getElementById('meeting-title');
+
+const validateInputs = () => {
+    let allValid = true;
+    inputs.forEach(input => {
+        if(input.value.trim() === '' || (input.tagName === 'SELECT' && input.selectedIndex === 0)) {
+            input.classList.add('invalid'); // invalid 클래스 추가 
+            allValid = false;
+        } else {
+            input.classList.remove('invalid'); // invalid 클래스 제거
+        }
+    });
+    startBtn.disabled = !allValid; // 모든 input이 유효할 때만 버튼 활성화
+
+};
+
+
+
+// 입력 필드 및 select에 이벤트 리스너 추가
+inputs.forEach(input => {
+    input.addEventListener('input', validateInputs);
+    input.addEventListener('blur', validateInputs);
+    input.addEventListener('change', validateInputs); // select의 변경 처리를 위한 이벤트
+});
+
+
+
+// 회의 시작 버튼 클릭 이벤트
+
+startBtn.addEventListener('click', () => {
+    if(validateInputs()) {
+        alert('회의를 시작합니다.');
+    }
+});
+
+
+
+// 초기 placeholder 색상으로 설정 (optional)
+// validateInputs(); // 페이지 로드 시 유효성 검사 실행
+
+// 페이지 로드 시 회의 제목 input에 포커스 주기
+window.onload = () => {
+    meetingTitleInput.focus(); //회의 제목 input 에 포커스 
+}
