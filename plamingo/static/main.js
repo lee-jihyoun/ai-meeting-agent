@@ -226,24 +226,24 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
 
 // 참석자 입력행 추가 함수
 function addAttendeeRow(button) {
-    const row = button.parentElement; //현재 버튼이 속한 부모 요소 선택
+    const row = button.parentElement; // 현재 버튼이 속한 부모 요소 선택
     if (button.textContent === '+') {
-    const newRow = document.createElement('div'); //새로운 행 생성
-    newRow.className = "input-row row"; //클래스 이름 설정
-    newRow.innerHTML = `
-        <input type="text" placeholder="이름">
-        <select>
-            <option>직급 선택</option>
-            <option>전임</option>
-            <option>선임</option>
-            <option>책임</option>
-        </select>
-        <input type="text" placeholder="역할" required>
-        <button class="fab remove-btn" onclick="removeAttendeeRow(this)">-</button>
-    `;
-    document.getElementById("attendees").appendChild(newRow); //새로운 행 추가
+        const newRow = document.createElement('div'); // 새로운 행 생성
+        newRow.className = "input-row row"; // 클래스 이름 설정
+        newRow.innerHTML = `
+            <input type="text" class="name-input" placeholder="이름">
+            <select class="position-input">
+                <option>직급 선택</option>
+                <option>전임</option>
+                <option>선임</option>
+                <option>책임</option>
+            </select>
+            <input type="text" class="role-input" placeholder="역할" required>
+            <button class="fab remove-btn" onclick="removeAttendeeRow(this)">-</button>
+        `;
+        document.getElementById("attendees").appendChild(newRow); // 새로운 행 추가
     } else {
-    removeAttendeeRow(button); //참석자 제거
+        removeAttendeeRow(button); // 참석자 제거
     }
 }
 
