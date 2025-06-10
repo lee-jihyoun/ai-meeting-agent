@@ -6,7 +6,10 @@ from datetime import datetime
 import json
 from azure.storage.blob import BlobServiceClient
 
-load_dotenv()
+# 현재 파일 기준으로 .env의 절대경로 생성
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dotenv_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=dotenv_path)
 
 speech_key = os.getenv("AI_SERVICE_KEY")
 region = os.getenv("AI_SERVICE_REGION")
@@ -140,12 +143,12 @@ def save_to_text(output_dir):
 
 
 # # # [Step4] 회의 txt 파일을 blob storage에 업로드
-def upload_txt_to_blob(today_str, output_dir, info):
+def upload_txt_to_blob(output_dir, info, file_name):
     # BlobServiceClient 생성
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-    local_file_path = f"../speech-service/{output_dir}/meeting_transcript.txt"   # 업로드할 파일 경로
-    blob_name = f"{today_str}_meeting.txt"           # Blob에 저장될 파일 이름
+    local_file_path = f"{output_dir}/meeting_transcript.txt"   # 업로드할 파일 경로
+    blob_name = f"{file_name}.txt"           # Blob에 저장될 파일 이름
 
     # 컨테이너의 BlobClient 생성
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
@@ -157,9 +160,9 @@ def upload_txt_to_blob(today_str, output_dir, info):
 
     # info.json 업로드
     info_json = json.dumps(info, ensure_ascii=False)
-    blob_client_json = blob_service_client.get_blob_client(container=container_name, blob='info.json')
+    blob_client_json = blob_service_client.get_blob_client(container=container_name, blob=f"{file_name}.json")
     blob_client_json.upload_blob(info_json, overwrite=True)
-    print(f"info 파일이 {container_name} 컨테이너에 info.json 이름으로 업로드되었습니다.")
+    print(f"info 파일이 {container_name} 컨테이너에 {file_name}.json 이름으로 업로드되었습니다.")
 
     # blob storage 조회
     # blobs = blob_service_client.get_container_client(container_name).list_blobs()
