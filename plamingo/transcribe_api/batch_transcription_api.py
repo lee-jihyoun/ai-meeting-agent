@@ -6,7 +6,10 @@ from datetime import datetime
 import json
 from azure.storage.blob import BlobServiceClient
 
-load_dotenv()
+# 현재 파일 기준으로 .env의 절대경로 생성
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dotenv_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=dotenv_path)
 
 speech_key = os.getenv("AI_SERVICE_KEY")
 region = os.getenv("AI_SERVICE_REGION")
