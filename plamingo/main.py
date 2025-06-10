@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from transcribe_api.batch_transcription_api import req_batch_transcription_api, save_response_to_json, save_to_text, upload_txt_to_blob
+from report_api.meeting_agent import summarize_meeting_notes
 
 app = Flask(__name__)
 load_dotenv()
@@ -19,6 +20,10 @@ def transcribe():
     sas_url = request.args.get('sas_url')  # 쿼리스트링에서 sas_url 파라미터 추출
     if not sas_url:
         return jsonify({'error': 'sas_url is required'}), 400
+
+    file_name = request.args.get('file_name')
+    if not sas_url:
+        return jsonify({'error': 'file_name is required'}), 400
 
     info = request.get_json()
     if not info:
@@ -36,7 +41,10 @@ def transcribe():
     save_to_text(output_dir)
 
     # txt 파일을 blob 업로드
-    upload_txt_to_blob(today_str, output_dir, info)
+    upload_txt_to_blob(output_dir, info, file_name)
+    # ai가 회의록 요약
+    summarize_meeting_notes(file_name)
+
     return jsonify({'status': 'success'}), 200
 
 

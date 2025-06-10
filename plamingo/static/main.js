@@ -4,6 +4,7 @@ let startTime; //회의시작 시간
 let startTimeFormatted; //회의시작 시간(yyyymmdd)
 let audioCtx, micStream, processor, pcmData = []; // 오디오 처리 관련 변수 
 const attendees = []; //참석자 목록 배열
+let filename; //파일 이름 변수
 
 // 타이머 시작 함수 
 function startTimer() {
@@ -124,7 +125,7 @@ async function uploadWavToAzureBlob(file, sasUrl) {
 }
 
 // 요청을 보내는 함수
-function sendRequest(meetingAction, sas_url) {
+function sendRequest(meetingAction, sas_url, filename) {
     const title = document.getElementById('meeting-title').value;
     const content = document.getElementById('meeting-content').value;
     const writerName = document.getElementById('writer-name').value;
@@ -166,8 +167,8 @@ function sendRequest(meetingAction, sas_url) {
     }
 
     //회의 종료
-    else if (meetingAction == 'endMeeting') {   
-        fetch(`/transcribe?sas_url=${sas_url}`, { //서버 요청
+    else if (meetingAction == 'endMeeting') {
+        fetch(`/transcribe?sas_url=${sas_url}&file_name=${encodeURIComponent(filename)}`, { //서버 요청
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -188,7 +189,7 @@ document.getElementById("startBtn").addEventListener("click", async () => {
     const stream = await getMicStream(); //마이크 스트림 가져오기
     connectProcessor(); //오디오 프로세서 연결
     startTimer(); //타이머 시작
-    sendRequest("startMeeting", null); //회의 시작 요청
+    sendRequest("startMeeting", null, null); //회의 시작 요청
 });
 
 
@@ -201,11 +202,12 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
     pcmData = []; // PCM 데이터 초기화
 
     // 1. 서버에서 SAS URL을 받아옵니다
-    const filename = `plamingo_meeting_${startTimeFormatted}.wav`;
+    filename = `plamingo_meeting_${startTimeFormatted}`;
     // azure portal에서 CORS 허용을 해줘야 함.
 
     //generate_sas_url API 호출
-    const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(filename)}`);
+    const wavFilename = `plamingo_meeting_${startTimeFormatted}.wav`;
+    const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavFilename)}`);
     const data = await sasResponse.json();
     const sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
     console.log("SAS URL: ", sasUrl);
@@ -215,7 +217,7 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
     console.log("WAV 파일 업로드 완료");
 
     // 3. 회의 종료 요청
-    sendRequest("endMeeting", sasUrl); //transcribe API 호출
+    sendRequest("endMeeting", sasUrl, filename); //transcribe API 호출
     stopTimer(); // 타이머 종료
 
     // TODO: 화면에 api 상태 표시??
