@@ -7,6 +7,7 @@ from urllib.parse import quote
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from transcribe_api.batch_transcription_api import req_batch_transcription_api, save_response_to_json, save_to_text, upload_txt_to_blob
 from report_api.meeting_agent import summarize_meeting_notes
+from transcribe_api.audio_upload import upload_to_blob
 
 app = Flask(__name__)
 load_dotenv()
@@ -29,21 +30,22 @@ def transcribe():
     if not info:
         return jsonify({'error': 'info JSON is required'}), 400
 
-    # batch_transcription_api를 사용하여 음성파일을 txt로 변환
+    # 1. batch_transcription_api를 사용하여 음성파일을 txt로 변환
     response_json = req_batch_transcription_api(sas_url)
-
     try:
         today_str, output_dir = save_response_to_json(response_json)
     except Exception as e:
         print(e)
         sys.exit()
-
     save_to_text(output_dir)
 
-    # txt 파일을 blob 업로드
+    # 2. txt 파일을 blob 업로드
     upload_txt_to_blob(output_dir, info, file_name)
-    # ai가 회의록 요약
-    summarize_meeting_notes(file_name)
+    # 3. ai가 회의록 요약
+    meeting_notes = summarize_meeting_notes(info, file_name)
+    # 4. 회의록 blob 업로드
+    container_name = "meeting-notes"
+    upload_to_blob(file_name, meeting_notes, container_name)
 
     return jsonify({'status': 'success'}), 200
 

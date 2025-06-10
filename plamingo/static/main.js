@@ -121,7 +121,7 @@ async function uploadWavToAzureBlob(file, sasUrl) {
     if (!response.ok) {
         throw new Error("업로드 실패: " + response.statusText);
     }
-    alert("업로드 완료");
+    // alert("업로드 완료");
 }
 
 // 요청을 보내는 함수

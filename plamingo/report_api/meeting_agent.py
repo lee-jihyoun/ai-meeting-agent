@@ -4,7 +4,8 @@ from azure.storage.blob import BlobServiceClient
 from openai import AzureOpenAI, OpenAIError
 
 
-def summarize_meeting_notes(file_name):
+# blob에 업로드: .wav, .txt, .json. .md -> blob에 올라간 txt를 그대로 ai가 사용
+def summarize_meeting_notes(info, file_name):
     print("AI가 요약을 시작합니다.")
     # ─────────────────── 환경 변수 로딩 ───────────────────
     load_dotenv()   # .env 파일에 ① AZURE_OPENAI_API_KEY ② AZURE_OPENAI_ENDPOINT
@@ -14,24 +15,20 @@ def summarize_meeting_notes(file_name):
     container_name = "meeting-text"
 
     # ─────────────────── 1) Blob에서 STT 원문 가져오기 ───────────────────
-    blob_service = BlobServiceClient.from_connection_string(
-        os.getenv("BLOB_CONNECTION_STRING"))
+    blob_service = BlobServiceClient.from_connection_string(os.getenv("BLOB_CONNECTION_STRING"))
 
-    blob_client  = blob_service.get_container_client(
-        container_name).get_blob_client(file_name+'.txt')
-
+    blob_client = blob_service.get_container_client(container_name).get_blob_client(file_name+'.txt')
     # print("blob_client: ", blob_client)
 
     stt_text = blob_client.download_blob().content_as_text()
     # print("STT 원문 일부 ↓\n", stt_text[:200], "...\n")
 
-    # TODO: meeting-text 컨테이너에서 info.json에서 읽어올 수 있도록 준비
     # ─────────────────── 2) 회의 메타데이터 준비 ───────────────────
     meeting_meta = {
-        "title"      : "프로젝트 플라밍고 킥오프",
-        "datetime"   : f"{dt.datetime.now():%Y년 %m월 %d일 %H:%M}",
-        "writer"     : "김지현/선임/kimjh@example.com",
-        "attendees"  : "박수영/책임/PM, 이준호/선임/개발, 최유진/전임/디자인",
+        "title"      : info['title'],
+        "datetime"   : info['startTime'],
+        "writer"     : info['writer'],
+        "attendees"  : info['attendees'],
     }
 
     # TODO: 프롬프트 다듬으면서 테스트하기
@@ -183,6 +180,8 @@ def summarize_meeting_notes(file_name):
             ]
         )
         summary = resp.choices[0].message.content
-        print("\n──────── 요약 결과 ────────\n", summary)
+        # print("\n──────── 요약 결과 ────────\n", summary)
+        return summary
+
     except OpenAIError as e:
         print("OpenAI 호출 오류:", e)
