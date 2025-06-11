@@ -33,16 +33,16 @@ account_key = os.getenv("STORAGE_ACCESS_KEY")
 
 
 # 파일을 blob storage에 업로드하기
-def upload_to_blob(file_name, meeting_notes, container_name):
+def upload_to_blob(file_name, meeting_notes, container_name, email):
     # Azure Storage 연결 문자열과 컨테이너 이름
     connection_string = os.getenv("BLOB_CONNECTION_STRING")
     # BlobServiceClient 생성
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
     # 컨테이너의 BlobClient 생성
-    blob_client = blob_service_client.get_blob_client(container=container_name, blob=f"{file_name}.md")
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob=f"{email}.html")
     blob_client.upload_blob(meeting_notes, overwrite=True) # 덮어쓰기 허용
     end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{end_time}] {file_name}.md 파일이 {container_name} 컨테이너에 업로드되었습니다.")
+    print(f"[{end_time}] {email}.html 파일이 {container_name} 컨테이너에 업로드되었습니다.")
 
 
 # def download_audio_from_blob(container_name, blob_name, download_file_path):
