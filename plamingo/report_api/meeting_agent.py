@@ -50,6 +50,7 @@ def summarize_meeting_notes(info, file_name):
     - 후속조치 및 마감일을 표로 정리
     - 전체 내용을 1000단어 이내로 작성
     - 출력 예시 결과를 참고하여 작성하며, 예시에 없는 내용은 제외
+    - 최종 결과물은 html 파일로 변환 
     
     #입력문
     회의 제목 : {title}
