@@ -186,6 +186,13 @@ function sendRequest(meetingAction, sas_url, filename) {
 
 // 회의 시작 버튼 클릭 이벤트 리스너
 document.getElementById("startBtn").addEventListener("click", async () => {
+    // 유효성 검사 실패 시 알림 및 return
+    if (!validateAllInputs()) {
+        console.log("startBtn validateAllInputs() : ", validateAllInputs());
+        alert("필수 입력란을 모두 입력해 주세요.");
+        return;
+    }
+
     const stream = await getMicStream(); //마이크 스트림 가져오기
     connectProcessor(); //오디오 프로세서 연결
     startTimer(); //타이머 시작
