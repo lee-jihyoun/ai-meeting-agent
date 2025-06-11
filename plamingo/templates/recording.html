@@ -4,33 +4,33 @@
   <meta charset="UTF-8">
   <title>Plamingo</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Favicon 설정 : 404 에러 방지-->
+  <link rel="shortcut icon" href="#">
 </head>
-<!-- Favicon 설정 : 404 에러 방지-->
-<link rel="shortcut icon" href="#">
 <body>
   <h1>Plamingo</h1>
 
   <div class="container">
     <h3><label>회의 제목 </label></h3>
-    <input type="text" id="meeting-title" required><br><br><!-- 회의 제목 입력 필드 -->
+    <input type="text" id="meeting-title" placeholder="회의 제목을 입력하세요." required><br><br><!-- 회의 제목 입력 필드 -->
   </div>
   <div class="container">
     <h3><label>회의 내용 </label></h3>
-    <textarea id="meeting-content" rows="4"></textarea><br><br><!-- 회의 내용 입력 필드 -->
+    <textarea id="meeting-content" rows="4" placeholder="회의 내용을 입력하세요." required></textarea><br><br><!-- 회의 내용 입력 필드 -->
   </div>
 
   <div class="container">
     <h3><label>작성자 </label></h3>
     <div class="row">
-        <input type="text" id="writer-name" placeholder="이름" required><!-- 작성자 이름 입력 필드 -->
-        <select id="writer-position"><!-- 작성자 직급 선택 필드 -->
+        <input type="text" id="writer-name" placeholder="이름 입력" required><!-- 작성자 이름 입력 필드 -->
+        <select id="writer-position" required><!-- 작성자 직급 선택 필드 -->
             <option>직급 선택</option>
             <option>전임</option>
             <option>선임</option>
             <option>책임</option>
         </select>
         
-        <input type="email" id="writer-email" placeholder="이메일" required><!-- 작성자 이메일 입력 필드 -->
+        <input type="email" id="writer-email" placeholder="이메일 입력" required><!-- 작성자 이메일 입력 필드 -->
     </div>
   </div>
 
@@ -38,14 +38,14 @@
     <h3><label class="fixed-label">참석자 </label></h3>
     <div class="scroll-container" id="attendees"><!-- 참석자 입력 필드 -->
         <div class="input-row row">
-            <input type="text" class="name-input" placeholder="이름"><!-- 참석자 이름 입력 필드 -->
-            <select class="position-input"><!-- 참석자 직급 선택 필드 -->
+            <input type="text" class="name-input" placeholder="이름 입력" required><!-- 참석자 이름 입력 필드 -->
+            <select class="position-input" required><!-- 참석자 직급 선택 필드 -->
                 <option>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
             </select>
-            <input type="text" class="role-input" id="authorRole" placeholder="역할"><!-- 참석자 역할 입력 필드 -->
+            <input type="text" class="role-input" id="authorRole" placeholder="역할 입력" required><!-- 참석자 역할 입력 필드 -->
             <button class="fab add-btn" onclick="addAttendeeRow(this)">+</button><!-- 참석자 추가 버튼 -->
         </div>
     </div>
@@ -60,10 +60,10 @@
   <br>
   <br>
 
-  <div class="container">
-    <button id="startBtn">회의 시작</button><!-- 회의 시작 버튼 -->
+  <div class="container buttons">
+    <button id="startBtn" disabled>회의 시작</button><!-- 회의 시작 버튼 -->
     <button id="stopBtn" style="display: none;">회의 종료</button><!-- 회의 종료 버튼 -->
-  </div>  
+  </div>
 
   <script src="{{ url_for('static', filename='main.js') }}"></script>
   

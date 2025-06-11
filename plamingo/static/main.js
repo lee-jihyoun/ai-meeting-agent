@@ -1,4 +1,3 @@
-
 let timerInterval; //타이머 인터벌 변수 
 let startTime; //회의시작 시간
 let startTimeFormatted; //회의시작 시간(yyyymmdd)
@@ -186,6 +185,14 @@ function sendRequest(meetingAction, sas_url, filename) {
 
 // 회의 시작 버튼 클릭 이벤트 리스너
 document.getElementById("startBtn").addEventListener("click", async () => {
+    // 유효성 검사 실패 시 알림 및 return
+    if (!validateAllInputs()) {
+        console.log("startBtn validateAllInputs : ", validateAllInputs);
+        alert("필수 입력값이 누락되었습니다.");
+    } else {
+        alert("회의가 시작되었습니다.");
+    }
+
     const stream = await getMicStream(); //마이크 스트림 가져오기
     connectProcessor(); //오디오 프로세서 연결
     startTimer(); //타이머 시작
@@ -231,19 +238,24 @@ function addAttendeeRow(button) {
         const newRow = document.createElement('div'); // 새로운 행 생성
         newRow.className = "input-row row"; // 클래스 이름 설정
         newRow.innerHTML = `
-            <input type="text" class="name-input" placeholder="이름">
+            <input type="text" class="name-input" placeholder="이름 입력">
             <select class="position-input">
                 <option>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
             </select>
-            <input type="text" class="role-input" placeholder="역할" required>
+            <input type="text" class="role-input" placeholder="역할 입력" required>
             <button class="fab remove-btn" onclick="removeAttendeeRow(this)">-</button>
         `;
-        document.getElementById("attendees").appendChild(newRow); // 새로운 행 추가
+        document.getElementById("attendees").appendChild(newRow);
+        // 새로 추가된 입력란에 이벤트 리스너 추가
+        const newInputs = newRow.querySelectorAll('input, select');
+        addEventListenersToInputs(newInputs);
+        // 추가 후 유효성 검사
+        validateAllInputs();
     } else {
-        removeAttendeeRow(button); // 참석자 제거
+        removeAttendeeRow(button);
     }
 }
 
@@ -251,4 +263,52 @@ function addAttendeeRow(button) {
 function removeAttendeeRow(button) {
     const row = button.parentElement; //현재 버튼이 속한 부모 요소 선택
     document.getElementById("attendees").removeChild(row); //부모 요소에서 행 제거
+    // 제거 후 유효성 검사
+    validateAllInputs();
 }
+
+// 유효성 검사 및 invalid 클래스 적용 함수
+function validateAllInputs() {
+    let allValid = true;
+    const attendeeRows = document.querySelectorAll('.input-row.row');
+    attendeeRows.forEach(row => {
+        const inputs = row.querySelectorAll('input[required], select[required], textarea[required]');
+        const isInvalid = Array.from(inputs).some(input => 
+            input.value.trim() === '' || (input.tagName === 'SELECT' && input.selectedIndex === 0)
+        );
+        if (isInvalid) {
+            row.classList.add('invalid');
+            allValid = false;
+        } else {
+            row.classList.remove('invalid');
+        }
+    });
+    // 기타 필수 입력 필드(회의 제목, 회의 내용 등)도 필요하다면 여기서 추가
+    const otherInputs = document.querySelectorAll('input[required], textarea[required], select[required]:not(.input-row.row input, .input-row.row select)');
+    otherInputs.forEach(input => {
+        if(input.value.trim() === '' || (input.tagName === 'SELECT' && input.selectedIndex === 0)) {
+            input.classList.add('invalid');
+            allValid = false;
+        } else {
+            input.classList.remove('invalid');
+        }
+    });
+    startBtn.disabled = !allValid;
+    return allValid;
+}
+
+// 동적 요소에도 이벤트 리스너 등록
+function addEventListenersToInputs(inputs) {
+    inputs.forEach(input => {
+        input.addEventListener('input', validateAllInputs);
+        input.addEventListener('blur', validateAllInputs);
+        input.addEventListener('change', validateAllInputs);
+    });
+}
+
+// 페이지 로드 시 모든 입력란에 이벤트 리스너 추가
+window.onload = () => {
+    const allInputs = document.querySelectorAll('input[required], textarea[required], select[required]');
+    addEventListenersToInputs(allInputs);
+    document.getElementById('meeting-title').focus();
+};
