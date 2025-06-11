@@ -15,16 +15,30 @@ body {
     display: flex; 
     gap: 10px; 
     margin-bottom: 10px; 
+    flex: 1;
+    align-items: center; /* 내부 요소를 세로로 중앙 정렬 */
 }
 
 
 
 .scroll-container { 
-    max-height: 150px; 
-    overflow-y: auto; 
-    border: 1px solid #FFF; 
-    padding: 10px; 
+    flex-direction: column;      /* 여러 참석자 행이 쌓일 때 세로로 */
+    gap: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #FFF;
+    padding: 10px;
     border-radius: 10px;
+    background: #fafafa;
+}
+
+/* scroll-container 내부의 input-row.row 스타일 */
+.scroll-container .input-row.row {
+    display: flex;
+    gap: 10px;
+    align-items: center; /* 내부 요소를 세로로 중앙 정렬 */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 button { 
@@ -35,32 +49,65 @@ button {
 
 .container {
     display: flex;
-    justify-content: center; /* 가로 방향 가운데 정렬 */
-    align-items: center;
-    text-align: start; /* 텍스트 왼쪽 정렬 */
-    width: 50%;
+    align-items: flex-start;      /* 세로 기준 위쪽에 맞춤 */
+    width: 60%;                  /* 전체 폼의 적당한 너비 */
     gap: 10px;
+    margin-bottom: 10px;
+}
+
+.container.buttons {
+    display: flex;
+    justify-content: center; /* 가로 방향 가운데 정렬 */
+    align-items: center;     /* 세로 방향 가운데 정렬 */
+    width: 60%;              /* 원하는 너비로 조정 */
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 #content {
     overflow: auto;
 }
 
-input, select, textarea, p {
+input, select, textarea {
+    box-sizing: border-box;
+    font-family: inherit;
     width: 100%;
     border-radius: 10px;
     padding: 5px;
     border: 1px solid #ccc;
     font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+#writer-name, #writer-position, #writer-email, 
+.name-input, .position-input, .role-input {
+    width: 33%;
+    /* height: 40px; */
+    padding: 5px;
+    border-radius: 10px;
+    font-size: 16px;
+    /* box-sizing: border-box; */
 }
 
 h3 {
-    flex: 0 0 20%; /* 20%의 너비를 차지하도록 설정 */
-    text-align: left; /* 텍스트 왼쪽 정렬 */
+    flex: 0 0 140px;             /* 레이블 너비 고정 (원하는 크기로 조정) */
+    margin: 0;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    min-width: 110px;            /* 최소 너비 지정(필요시) */
 }
 
 .row, .scroll-container {
-    flex: 1; /* 나머지 공간을 차지하도록 설정 */
+    flex: 1;
+    width: 100%;                 /* 부모 기준으로 꽉 차게 */
+    box-sizing: border-box;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0;
+    background: none;
+    border: none;
 }
 
 .fixed-label {
@@ -101,9 +148,6 @@ h3 {
     background-color: white;
     color: #4CAF50;
     border: 4px solid #4CAF50;
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
 }
 
 /* 빨간색 삭제 버튼 */
@@ -111,9 +155,26 @@ h3 {
     background-color: white;
     color: #F44336;
     border: 4px solid #F44336;
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
+}
+
+.fab.add-btn, .fab.remove-btn {
+    width: 36px;
+    height: 36px;
+    aspect-ratio: 1 / 1;              /* 항상 정사각형(최신 브라우저 지원) */
+    border-radius: 50%;               /* 완전한 원형 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;                  /* 아이콘 크기 */
+    font-weight: bold;
+    border: 4px solid;                /* 각각 색상은 아래에서 지정 */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    background: #fff;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    /* outline: none; (필요시) */
 }
 
 #startBtn {

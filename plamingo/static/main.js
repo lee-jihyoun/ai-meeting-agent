@@ -238,14 +238,14 @@ function addAttendeeRow(button) {
         const newRow = document.createElement('div'); // 새로운 행 생성
         newRow.className = "input-row row"; // 클래스 이름 설정
         newRow.innerHTML = `
-            <input type="text" class="name-input" placeholder="이름">
+            <input type="text" class="name-input" placeholder="이름 입력">
             <select class="position-input">
                 <option>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
             </select>
-            <input type="text" class="role-input" placeholder="역할" required>
+            <input type="text" class="role-input" placeholder="역할 입력" required>
             <button class="fab remove-btn" onclick="removeAttendeeRow(this)">-</button>
         `;
         document.getElementById("attendees").appendChild(newRow);
