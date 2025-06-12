@@ -193,6 +193,14 @@ document.getElementById("startBtn").addEventListener("click", async () => {
         alert("회의가 시작되었습니다.");
     }
 
+    // 유효성 검사 실패 시 알림 및 return
+    if (!validateAllInputs()) {
+        console.log("startBtn validateAllInputs : ", validateAllInputs);
+        alert("필수 입력값이 누락되었습니다.");
+    } else {
+        alert("회의가 시작되었습니다.");
+    }
+
     const stream = await getMicStream(); //마이크 스트림 가져오기
     connectProcessor(); //오디오 프로세서 연결
     startTimer(); //타이머 시작
@@ -239,12 +247,14 @@ function addAttendeeRow(button) {
         newRow.className = "input-row row"; // 클래스 이름 설정
         newRow.innerHTML = `
             <input type="text" class="name-input" placeholder="이름 입력">
+            <input type="text" class="name-input" placeholder="이름 입력">
             <select class="position-input">
                 <option>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
             </select>
+            <input type="text" class="role-input" placeholder="역할 입력" required>
             <input type="text" class="role-input" placeholder="역할 입력" required>
             <button class="fab remove-btn" onclick="removeAttendeeRow(this)">-</button>
         `;
@@ -254,7 +264,14 @@ function addAttendeeRow(button) {
         addEventListenersToInputs(newInputs);
         // 추가 후 유효성 검사
         validateAllInputs();
+        document.getElementById("attendees").appendChild(newRow);
+        // 새로 추가된 입력란에 이벤트 리스너 추가
+        const newInputs = newRow.querySelectorAll('input, select');
+        addEventListenersToInputs(newInputs);
+        // 추가 후 유효성 검사
+        validateAllInputs();
     } else {
+        removeAttendeeRow(button);
         removeAttendeeRow(button);
     }
 }
@@ -305,44 +322,6 @@ function addEventListenersToInputs(inputs) {
         input.addEventListener('change', validateAllInputs);
     });
 }
-
-/*
-// 참석자 입력행 추가 함수
-function addAttendeeRow(button) {
-    const row = button.parentElement;
-    if (button.textContent === '+') {
-        const newRow = document.createElement('div');
-        newRow.className = "input-row row";
-        newRow.innerHTML = `
-            <input type="text" class="name-input" placeholder="이름 입력" required>
-            <select class="position-input" required>
-                <option>직급 선택</option>
-                <option>전임</option>
-                <option>선임</option>
-                <option>책임</option>
-            </select>
-            <input type="text" class="role-input" placeholder="역할 입력" required>
-            <button class="fab remove-btn" onclick="removeAttendeeRow(this)">-</button>
-        `;
-        document.getElementById("attendees").appendChild(newRow);
-        // 새로 추가된 입력란에 이벤트 리스너 추가
-        const newInputs = newRow.querySelectorAll('input, select');
-        addEventListenersToInputs(newInputs);
-        // 추가 후 유효성 검사
-        validateAllInputs();
-    } else {
-        removeAttendeeRow(button);
-    }
-}
-
-// 참석자 입력 행 제거 함수
-function removeAttendeeRow(button) {
-    const row = button.parentElement;
-    document.getElementById("attendees").removeChild(row);
-    // 제거 후 유효성 검사
-    validateAllInputs();
-}
-*/
 
 // 페이지 로드 시 모든 입력란에 이벤트 리스너 추가
 window.onload = () => {

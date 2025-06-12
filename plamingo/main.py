@@ -30,6 +30,8 @@ def transcribe():
     if not info:
         return jsonify({'error': 'info JSON is required'}), 400
 
+    email = info['writer'][2]
+
     # 1. batch_transcription_api를 사용하여 음성파일을 txt로 변환
     response_json = req_batch_transcription_api(sas_url)
     try:
@@ -45,7 +47,7 @@ def transcribe():
     meeting_notes = summarize_meeting_notes(info, file_name)
     # 4. 회의록 blob 업로드
     container_name = "meeting-notes"
-    upload_to_blob(file_name, meeting_notes, container_name)
+    upload_to_blob(file_name, meeting_notes, container_name, email)
 
     return jsonify({'status': 'success'}), 200
 
