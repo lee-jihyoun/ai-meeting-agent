@@ -12,6 +12,7 @@ body {
 
 
 .row { 
+    width: 100%;
     display: flex; 
     gap: 10px; 
     /* margin-bottom: 10px;  */
@@ -49,10 +50,18 @@ button {
 
 .container {
     display: flex;
-    align-items: flex-start;      /* 세로 기준 위쪽에 맞춤 */
+    align-items: center;      /* 세로 방향 가운데 정렬 */
     width: 60%;                  /* 전체 폼의 적당한 너비 */
     gap: 10px;
     margin-bottom: 10px;
+}
+
+.container .row {
+    width: 100%;
+    display: flex; 
+    gap: 10px;
+    flex: 1;
+    align-items: center; /* 내부 요소를 세로로 중앙 정렬 */
 }
 
 .container.buttons {
@@ -81,7 +90,7 @@ input, select, textarea {
 
 #writer-name, #writer-position, #writer-email, 
 .name-input, .position-input, .role-input {
-    width: 33%;
+    width: 32%;
     /* height: 40px; */
     /* padding: 5px; */
     border-radius: 10px;
