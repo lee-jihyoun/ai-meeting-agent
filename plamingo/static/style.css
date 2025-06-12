@@ -14,7 +14,7 @@ body {
 .row { 
     display: flex; 
     gap: 10px; 
-    margin-bottom: 10px; 
+    /* margin-bottom: 10px;  */
     flex: 1;
     align-items: center; /* 내부 요소를 세로로 중앙 정렬 */
 }
@@ -43,7 +43,7 @@ body {
 
 button { 
     padding: 10px; 
-    margin-top: 10px; 
+    /* margin-top: 10px;  */
     cursor: pointer; 
 }
 
@@ -61,7 +61,7 @@ button {
     align-items: center;     /* 세로 방향 가운데 정렬 */
     width: 60%;              /* 원하는 너비로 조정 */
     gap: 10px;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
 }
 
 #content {
@@ -73,7 +73,7 @@ input, select, textarea {
     font-family: inherit;
     width: 100%;
     border-radius: 10px;
-    padding: 5px;
+    padding: 10px;
     border: 1px solid #ccc;
     font-family: Arial, sans-serif;
     font-size: 16px;
@@ -83,7 +83,7 @@ input, select, textarea {
 .name-input, .position-input, .role-input {
     width: 33%;
     /* height: 40px; */
-    padding: 5px;
+    /* padding: 5px; */
     border-radius: 10px;
     font-size: 16px;
     /* box-sizing: border-box; */
