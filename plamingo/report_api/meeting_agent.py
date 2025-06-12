@@ -54,7 +54,8 @@ def summarize_meeting_notes(info, file_name):
         - 정보가 없으면 셀에 `-` 표기  
     7. 제공된 입력 정보만 사용하고, 존재하지 않는 내용은 **추정·창작하지 마세요.**
     8. 전체 분량은 **1 000단어 이내**로 제한
-    9. 최종 결과물은 html 파일로 변환 
+    9. 최종 결과물은 <html>...</html> 순수 HTML만 작성하라
+    10. 백틱( ``` ) 코드펜스, Markdown 문법은 절대 사용하지 마라
     
     # 입력
     회의 제목 : {title}
@@ -89,8 +90,8 @@ def summarize_meeting_notes(info, file_name):
     ---
     
     ## 결정 사항
-    • [결정 1]  
-    • [결정 2]
+    - [결정 1]  
+    - [결정 2]
 
     ---
     
@@ -129,7 +130,13 @@ def summarize_meeting_notes(info, file_name):
         )
         summary = resp.choices[0].message.content
         # print("\n──────── 요약 결과 ────────\n", summary)
-        return summary
+
+        # 최종 결과물에 백틱 포함 시 제거
+        if "```" in summary:
+            summary = summary.replace("```html","").replace("```","").strip()
+            return summary
+        else:
+            return summary
 
     except OpenAIError as e:
         print("OpenAI 호출 오류:", e)
