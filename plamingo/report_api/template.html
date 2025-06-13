@@ -5,33 +5,29 @@
     <title>{title} 회의록</title>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 32px; }}
-        table {{ border-collapse: collapse; width: 100%; margin-bottom: 24px; }}
-        th, td {{ border: 1px solid #333; padding: 8px; vertical-align: top; }}
-        th {{ background-color: #f5f5f5; text-align: left; }}
         h1, h2 {{ color: #333; }}
         hr {{ margin: 32px 0; }}
+        /* 표 스타일은 inline으로 처리 */
     </style>
-
-
 </head>
 <body>
 <h1>{title} 회의록</h1>
-<table>
+<table style="border-collapse: collapse; width: 100%; margin-bottom: 24px;">
     <tr>
-        <th>항목</th>
-        <th>내용</th>
+        <th style="border: 1px solid #333; background-color: #f5f5f5; text-align: left; padding: 8px;">항목</th>
+        <th style="border: 1px solid #333; background-color: #f5f5f5; text-align: left; padding: 8px;">내용</th>
     </tr>
     <tr>
-        <td><strong>날짜</strong></td>
-        <td>{date}</td>
+        <td style="border: 1px solid #333; padding: 8px;"><strong>날짜</strong></td>
+        <td style="border: 1px solid #333; padding: 8px;">{date}</td>
     </tr>
     <tr>
-        <td><strong>작성자</strong></td>
-        <td>{author}</td>
+        <td style="border: 1px solid #333; padding: 8px;"><strong>작성자</strong></td>
+        <td style="border: 1px solid #333; padding: 8px;">{author}</td>
     </tr>
     <tr>
-        <td><strong>참석자</strong></td>
-        <td>
+        <td style="border: 1px solid #333; padding: 8px;"><strong>참석자</strong></td>
+        <td style="border: 1px solid #333; padding: 8px;">
             <ul style="margin:0; padding-left:18px;">
                 {attendees}
             </ul>
@@ -63,11 +59,11 @@
 <hr>
 
 <h2>Action Item</h2>
-<table>
+<table style="border-collapse: collapse; width: 100%; margin-bottom: 24px;">
     <tr>
-        <th>담당자</th>
-        <th>작업내용</th>
-        <th>마감일</th>
+        <th style="border: 1px solid #333; background-color: #f5f5f5; text-align: left; padding: 8px;">담당자</th>
+        <th style="border: 1px solid #333; background-color: #f5f5f5; text-align: left; padding: 8px;">작업내용</th>
+        <th style="border: 1px solid #333; background-color: #f5f5f5; text-align: left; padding: 8px;">마감일</th>
     </tr>
     {action_items}
 </table>
