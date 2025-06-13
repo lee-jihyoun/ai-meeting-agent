@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{title} 회의록</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 32px; }}
+        table {{ border-collapse: collapse; width: 100%; margin-bottom: 24px; }}
+        th, td {{ border: 1px solid #333; padding: 8px; vertical-align: top; }}
+        th {{ background-color: #f5f5f5; text-align: left; }}
+        h1, h2 {{ color: #333; }}
+        hr {{ margin: 32px 0; }}
+    </style>
+
+
+</head>
+<body>
+<h1>{title} 회의록</h1>
+<table>
+    <tr>
+        <th>항목</th>
+        <th>내용</th>
+    </tr>
+    <tr>
+        <td><strong>날짜</strong></td>
+        <td>{date}</td>
+    </tr>
+    <tr>
+        <td><strong>작성자</strong></td>
+        <td>{author}</td>
+    </tr>
+    <tr>
+        <td><strong>참석자</strong></td>
+        <td>
+            <ul style="margin:0; padding-left:18px;">
+                {attendees}
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>안건(목적)</h2>
+<ul>
+    {objectives}
+</ul>
+
+<hr>
+
+<h2>협의(논의) 사항</h2>
+<ol>
+    {discussions}
+</ol>
+
+<hr>
+
+<h2>결정 사항</h2>
+<ul>
+    {decisions}
+</ul>
+
+<hr>
+
+<h2>Action Item</h2>
+<table>
+    <tr>
+        <th>담당자</th>
+        <th>작업내용</th>
+        <th>마감일</th>
+    </tr>
+    {action_items}
+</table>
+</body>
+</html>

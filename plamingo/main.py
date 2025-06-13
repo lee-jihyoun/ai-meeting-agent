@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from transcribe_api.batch_transcription_api import req_batch_transcription_api, save_response_to_json, save_to_text, upload_txt_to_blob
-from report_api.meeting_agent import summarize_meeting_notes
+from report_api.meeting_agent import summarize_meeting_notes, make_json_to_html
 from transcribe_api.audio_upload import upload_to_blob
 
 app = Flask(__name__)
@@ -44,8 +44,14 @@ def transcribe():
     # 2. txt 파일을 blob 업로드
     upload_txt_to_blob(output_dir, info, file_name)
     # 3. ai가 회의록 요약
-    meeting_notes = summarize_meeting_notes(info, file_name)
-    # 4. 회의록 blob 업로드
+    meeting_json = summarize_meeting_notes(info, file_name)
+    # print(meeting_json)
+
+    # 4. json을 html 템플릿에 맞게 변환
+    meeting_notes = make_json_to_html(meeting_json)
+    print(meeting_notes)
+
+    # 5. 회의록 blob 업로드
     container_name = "meeting-notes"
     upload_to_blob(file_name, meeting_notes, container_name, email)
 
