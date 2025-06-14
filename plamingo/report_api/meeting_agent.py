@@ -72,6 +72,56 @@ def summarize_meeting_notes(info, file_name):
     {{
       "minutes": {{
         "info": {{
+          "title": "",
+          "date": "",
+          "author": {{
+            "name": "",
+            "position": "",
+            "email": ""
+          }},
+          "attendees": [
+            {{
+              "name": "",
+              "position": "",
+              "role": ""
+            }}
+          ]
+        }},
+        "main_objectives": {{
+          "background": "",
+          "objectives": [
+            ""
+          ],
+          "agenda": [
+            ""
+          ]
+        }},
+        "main_discussions": [
+          {{
+            "topic": "",
+            "details": [
+              ""
+            ]
+          }}
+        ],
+        "key_decisions": [
+          ""
+        ],
+        "action_items": [
+          {{
+            "owner": "",
+            "task": "",
+            "due_date": ""
+          }}
+        ]
+      }}
+    }}
+
+
+ # 출력 예시
+    {{
+      "minutes": {{
+        "info": {{
           "title": "CAMP구축회의"
           "date": "2025년 06월 13일 14:14",
           "author": {{
@@ -227,9 +277,14 @@ def make_json_to_html(meeting_json):
 
         # 액션 아이템
         action_items_html = "\n".join(
-            f'<tr><td>{item["owner"]}</td><td>{item["task"]}</td><td>{item["due_date"]}</td></tr>'
+            f'<tr>'
+            f'<td style="border: 1px solid #333; padding: 8px;">{item["owner"]}</td>'
+            f'<td style="border: 1px solid #333; padding: 8px;">{item["task"]}</td>'
+            f'<td style="border: 1px solid #333; padding: 8px;">{item["due_date"]}</td>'
+            f'</tr>'
             for item in action_items
         )
+
 
         # 작성자
         author_str = f'{info["author"]["name"]}/{info["author"]["position"]}/{info["author"]["email"]}'
