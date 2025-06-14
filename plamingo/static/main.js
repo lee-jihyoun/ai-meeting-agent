@@ -186,25 +186,51 @@ function sendRequest(meetingAction, sas_url, filename) {
 const startBtn = document.getElementById('startBtn');
 
 // 회의 시작 버튼 클릭 이벤트 리스너
-startBtn.addEventListener("click", async () => {
-    // 유효성 검사 실패 시 알림 및 return
-    if (!validateAllInputs()) {
-        console.log("startBtn validateAllInputs : ", validateAllInputs);
-        alert("모든 필드를 입력한 후에 회의를 시작할 수 있습니다.");
-        // 유효하지 않으면 동작 중단
-        e.preventDefault();
+startBtn.addEventListener('click', async (e) => {      // ① e 추가
+  // (form 태그가 있고 버튼이 type="submit"이면 ↓ 주석 해제)
+  e.preventDefault();    // 기본 submit 동작 차단
 
-        return;
-    } else {
-        
-        alert("회의가 시작되었습니다.");
-    }
+  /* 1) 사용자 입력 검증 */
+  if (!validateAllInputs()) {
+    alert('모든 필드를 입력한 후에 회의를 시작할 수 있습니다.');
+    return;                       // 검증 실패 → 더 진행 X
+  }
 
-    const stream = await getMicStream(); //마이크 스트림 가져오기
-    connectProcessor(); //오디오 프로세서 연결
-    startTimer(); //타이머 시작
-    sendRequest("startMeeting", null, null); //회의 시작 요청
+  /* 2) 여기부터는 모든 필드가 유효할 때만 실행 */
+  try {
+    const stream = await getMicStream();  // 마이크 권한 요청
+    connectProcessor();                   // 오디오 프로세서 연결
+    startTimer();                         // 경과 타이머 시작
+    await sendRequest('startMeeting', null, null); // 서버 알림
+    alert('회의가 시작되었습니다.');
+  } catch (err) {
+    console.error('회의 시작 중 오류:', err);
+    alert('마이크 권한 거부 또는 네트워크 오류가 발생했습니다.');
+  }
 });
+
+// const startBtn = document.getElementById('startBtn');
+
+// // 회의 시작 버튼 클릭 이벤트 리스너
+// startBtn.addEventListener("click", async () => {
+//     // 유효성 검사 실패 시 알림 및 return
+//     if (!validateAllInputs()) {
+//         console.log("startBtn validateAllInputs : ", validateAllInputs);
+//         alert("모든 필드를 입력한 후에 회의를 시작할 수 있습니다.");
+//         // 유효하지 않으면 동작 중단
+//         e.preventDefault();
+
+//         return;
+//     } else {
+        
+//         alert("회의가 시작되었습니다.");
+//     }
+
+//     const stream = await getMicStream(); //마이크 스트림 가져오기
+//     connectProcessor(); //오디오 프로세서 연결
+//     startTimer(); //타이머 시작
+//     sendRequest("startMeeting", null, null); //회의 시작 요청
+// });
 
 
 document.getElementById("stopBtn").addEventListener("click", async () => {
@@ -300,7 +326,7 @@ function validateAllInputs() {
             input.classList.remove('invalid');
         }
     });
-    startBtn.disabled = !allValid;
+    // startBtn.disabled = !allValid; -> 필요없는 코드
     return allValid;
 }
 
