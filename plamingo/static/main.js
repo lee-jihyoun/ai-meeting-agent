@@ -183,16 +183,20 @@ function sendRequest(meetingAction, sas_url, filename) {
     }
 }
 
+const startBtn = document.getElementById('startBtn');
+
 // 회의 시작 버튼 클릭 이벤트 리스너
-document.getElementById("startBtn").addEventListener("click", async () => {
+startBtn.addEventListener("click", async () => {
     // 유효성 검사 실패 시 알림 및 return
     if (!validateAllInputs()) {
         console.log("startBtn validateAllInputs : ", validateAllInputs);
         alert("모든 필드를 입력한 후에 회의를 시작할 수 있습니다.");
         // 유효하지 않으면 동작 중단
         e.preventDefault();
+
         return;
     } else {
+        
         alert("회의가 시작되었습니다.");
     }
 
@@ -300,43 +304,27 @@ function validateAllInputs() {
     return allValid;
 }
 
-// // 동적 요소에도 이벤트 리스너 등록
-// function addEventListenersToInputs(inputs) {
-//     inputs.forEach(input => {
-//         input.addEventListener('input', validateAllInputs);
-//         input.addEventListener('blur', validateAllInputs);
-//         input.addEventListener('change', validateAllInputs);
-//     });
-// }
-
-window.addEventListener('DOMContentLoaded', () => {
-  const fields = document.querySelectorAll('input, select');
-  fields.forEach(field => {
-    // 입력 중에는 해당 필드의 오류 표시 제거
-    field.addEventListener('input', () => {
-      field.classList.remove('invalid');
+// 입력 필드들에 이벤트 리스너를 추가하는 함수 구현
+function addEventListenersToInputs() {
+const inputs = document.querySelectorAll('#meetingForm input');
+inputs.forEach(input => {
+    // 입력 중일 때 실시간 유효성 검사 표시 제거
+    input.addEventListener('input', () => {
+    input.classList.remove('invalid');  // 예: .invalid 클래스 제거하여 오류 표시 리셋
     });
-    // 포커스를 잃는 순간(blur) 해당 필드 값 검증
-    field.addEventListener('blur', () => {
-      if ((field.tagName !== 'SELECT' && field.value.trim() === '') || 
-          (field.tagName === 'SELECT' && field.value === '')) {
-        field.classList.add('invalid');
-      } else {
-        field.classList.remove('invalid');
-      }
-    });
-    // SELECT는 선택 변경 시 검증
-    if (field.tagName === 'SELECT') {
-      field.addEventListener('change', () => {
-        if (field.value === '') {
-          field.classList.add('invalid');
-        } else {
-          field.classList.remove('invalid');
-        }
-      });
+    // 포커스 잃을 때 처리 (필요 시 유효성 검사 수행)
+    input.addEventListener('blur', () => {
+    if (!input.value.trim()) {
+        // 빈 값인 채 포커스 아웃되면 touched 표시만 하고 즉시 .invalid 적용은 보류
+        input.classList.add('touched');
     }
-  });
-  // 초기 로드 시 fields를 검증하지 않음 (버튼 disabled는 HTML로 유지)
+    });
+});
+}
+
+// DOM 로드 후에 함수 호출
+document.addEventListener('DOMContentLoaded', () => {
+addEventListenersToInputs();  // 함수 정의 후 호출하므로 오류 없음
 });
 
 // 페이지 로드 시 모든 입력란에 이벤트 리스너 추가
