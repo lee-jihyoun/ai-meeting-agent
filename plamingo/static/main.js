@@ -285,8 +285,7 @@ function addAttendeeRow(button) {
         // 새로 추가된 입력란에 이벤트 리스너 추가
         const newInputs = newRow.querySelectorAll('input, select');
         addEventListenersToInputs(newInputs);
-        // 추가 후 유효성 검사
-        validateAllInputs();
+
     } else {
         removeAttendeeRow(button);
     }
@@ -296,8 +295,6 @@ function addAttendeeRow(button) {
 function removeAttendeeRow(button) {
     const row = button.parentElement; //현재 버튼이 속한 부모 요소 선택
     document.getElementById("attendees").removeChild(row); //부모 요소에서 행 제거
-    // 제거 후 유효성 검사
-    validateAllInputs();
 }
 
 // 유효성 검사 및 invalid 클래스 적용 함수
