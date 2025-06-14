@@ -24,7 +24,7 @@
     <div class="row">
         <input type="text" id="writer-name" placeholder="이름 입력" required><!-- 작성자 이름 입력 필드 -->
         <select id="writer-position" required><!-- 작성자 직급 선택 필드 -->
-            <option>직급 선택</option>
+            <option value="" selected disabled>직급 선택</option>
             <option>전임</option>
             <option>선임</option>
             <option>책임</option>
@@ -61,7 +61,7 @@
   <br>
 
   <div class="container buttons">
-    <button id="startBtn" disabled>회의 시작</button><!-- 회의 시작 버튼 -->
+    <button id="startBtn" type="button" class="disabled-btn">회의 시작</button><!-- 회의 시작 버튼 -->
     <button id="stopBtn" style="display: none;">회의 종료</button><!-- 회의 종료 버튼 -->
   </div>
 

@@ -188,7 +188,10 @@ document.getElementById("startBtn").addEventListener("click", async () => {
     // 유효성 검사 실패 시 알림 및 return
     if (!validateAllInputs()) {
         console.log("startBtn validateAllInputs : ", validateAllInputs);
-        alert("필수 입력값이 누락되었습니다.");
+        alert("모든 필드를 입력한 후에 회의를 시작할 수 있습니다.");
+        // 유효하지 않으면 동작 중단
+        e.preventDefault();
+        return;
     } else {
         alert("회의가 시작되었습니다.");
     }
@@ -240,7 +243,7 @@ function addAttendeeRow(button) {
         newRow.innerHTML = `
             <input type="text" class="name-input" placeholder="이름 입력">
             <select class="position-input">
-                <option>직급 선택</option>
+                <option value="" selected disabled>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
@@ -297,14 +300,44 @@ function validateAllInputs() {
     return allValid;
 }
 
-// 동적 요소에도 이벤트 리스너 등록
-function addEventListenersToInputs(inputs) {
-    inputs.forEach(input => {
-        input.addEventListener('input', validateAllInputs);
-        input.addEventListener('blur', validateAllInputs);
-        input.addEventListener('change', validateAllInputs);
+// // 동적 요소에도 이벤트 리스너 등록
+// function addEventListenersToInputs(inputs) {
+//     inputs.forEach(input => {
+//         input.addEventListener('input', validateAllInputs);
+//         input.addEventListener('blur', validateAllInputs);
+//         input.addEventListener('change', validateAllInputs);
+//     });
+// }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const fields = document.querySelectorAll('input, select');
+  fields.forEach(field => {
+    // 입력 중에는 해당 필드의 오류 표시 제거
+    field.addEventListener('input', () => {
+      field.classList.remove('invalid');
     });
-}
+    // 포커스를 잃는 순간(blur) 해당 필드 값 검증
+    field.addEventListener('blur', () => {
+      if ((field.tagName !== 'SELECT' && field.value.trim() === '') || 
+          (field.tagName === 'SELECT' && field.value === '')) {
+        field.classList.add('invalid');
+      } else {
+        field.classList.remove('invalid');
+      }
+    });
+    // SELECT는 선택 변경 시 검증
+    if (field.tagName === 'SELECT') {
+      field.addEventListener('change', () => {
+        if (field.value === '') {
+          field.classList.add('invalid');
+        } else {
+          field.classList.remove('invalid');
+        }
+      });
+    }
+  });
+  // 초기 로드 시 fields를 검증하지 않음 (버튼 disabled는 HTML로 유지)
+});
 
 // 페이지 로드 시 모든 입력란에 이벤트 리스너 추가
 window.onload = () => {
