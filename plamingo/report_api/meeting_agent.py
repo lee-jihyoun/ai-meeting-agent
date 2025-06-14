@@ -58,7 +58,11 @@ def summarize_meeting_notes(info, file_name):
         - 정보가 없으면 셀에 `-` 표기          
     7. 제공된 입력 정보만 사용하고, 존재하지 않는 내용은 **추정·창작하지 마세요.**
     8. 전체 분량은 **1 000단어 이내**로 제한
-    9. 최종 결과물은 json 형태로 작성하라
+    9. 최종 결과물은 반드시 유효한 JSON만 출력하라. 
+    10. 설명, 주석, 마크다운, 코드펜스, 기타 텍스트를 포함하지 마라.
+    11. 모든 필드는 반드시 채워라.
+    12. 응답이 길어질 경우, 반드시 JSON 전체를 반환하라.
+    13. action_items 등 일부만 반환해도 좋으니 반드시 완전한 JSON만 반환하라
     10. 백틱( ``` ) 코드펜스, Markdown 문법은 절대 사용하지 마라
     
     # 입력
@@ -216,7 +220,7 @@ def summarize_meeting_notes(info, file_name):
         resp = client.chat.completions.create(
             model       = "plamingo-gpt-4o",        # ← 포털에서 배포한 Deployment 이름
             temperature = 0.2,
-            max_tokens  = 800,
+            max_tokens  = 2000,
             messages=[
                 {"role": "system", "content": SYSTEM_MSG},
                 {"role": "user",   "content": user_prompt}
@@ -225,20 +229,20 @@ def summarize_meeting_notes(info, file_name):
         summary = resp.choices[0].message.content
         # print("\n──────── 요약 결과 ────────\n", summary)
 
-        # 최종 결과물에 백틱 포함 시 제거
-        if "```" in summary:
-            summary = summary.replace("```html","").replace("```","").strip()
-            return summary
-        else:
-            return summary
+        # TODO: json 구조가 제대로 생성이 안된 경우 재시도.
+        try:
+            summary = json.loads(summary)
+            # print(summary)
+        except Exception as e:
+            print(summary)
+            print(e)
+        return summary
 
     except OpenAIError as e:
         print("OpenAI 호출 오류:", e)
 
 
 def make_json_to_html(meeting_json):
-    meeting_json = json.loads(meeting_json)
-
     # 현재 파이썬 파일의 위치를 기준으로 경로 생성
     base_dir = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(base_dir, 'template.html')
@@ -253,11 +257,16 @@ def make_json_to_html(meeting_json):
         action_items = meeting_json["minutes"]["action_items"]
 
         # 참석자
-        attendees_html = "\n".join(
-            f'{a["name"]}/{a["position"]}/{a["role"]}</li>' for a in info["attendees"]
-        )
+        attendees_html = ""
+        for i, a in enumerate(info["attendees"]):
+            attendees_html += (
+                f'<tr>'
+                f'<td style="border: 1px solid #333; padding: 8px;">{"<strong>참석자</strong>" if i == 0 else ""}</td>'
+                f'<td style="border: 1px solid #333; padding: 8px;">{a["name"]}/{a["position"]}/{a["role"]}</td>'
+                f'</tr>\n'
+            )
 
-        # 목적/안건
+      # 목적/안건
         objectives_html = ""
         if isinstance(main_objectives.get("objectives"), list):
             objectives_html += "\n".join(f"<li>{item}</li>" for item in main_objectives["objectives"])
@@ -284,7 +293,6 @@ def make_json_to_html(meeting_json):
             f'</tr>'
             for item in action_items
         )
-
 
         # 작성자
         author_str = f'{info["author"]["name"]}/{info["author"]["position"]}/{info["author"]["email"]}'
