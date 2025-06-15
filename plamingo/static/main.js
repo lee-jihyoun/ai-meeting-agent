@@ -247,8 +247,8 @@ function addAttendeeRow(button) {
         const newRow = document.createElement('div'); // 새로운 행 생성
         newRow.className = "input-row row"; // 클래스 이름 설정
         newRow.innerHTML = `
-            <input type="text" class="name-input" placeholder="이름 입력">
-            <select class="position-input">
+            <input type="text" class="name-input" placeholder="이름 입력" required>
+            <select class="position-input" required>
                 <option value="" selected disabled>직급 선택</option>
                 <option>전임</option>
                 <option>선임</option>
@@ -306,20 +306,19 @@ function validateAllInputs() {
 // 입력 필드들에 이벤트 리스너를 추가하는 함수 구현
 function addEventListenersToInputs() {
     const inputs = document.querySelectorAll('input, select, textarea');
-// const inputs = document.querySelectorAll('#meetingForm input');
-inputs.forEach(input => {
-    // 입력 중일 때 실시간 유효성 검사 표시 제거
-    input.addEventListener('input', () => {
-    input.classList.remove('invalid');  // 예: .invalid 클래스 제거하여 오류 표시 리셋
+    inputs.forEach(input => {
+        // 입력 중일 때 실시간 유효성 검사 표시 제거
+        input.addEventListener('input', () => {
+        input.classList.remove('invalid');  // 예: .invalid 클래스 제거하여 오류 표시 리셋
+        });
+        // 포커스 잃을 때 처리 (필요 시 유효성 검사 수행)
+        input.addEventListener('blur', () => {
+        if (!input.value.trim()) {
+            // 빈 값인 채 포커스 아웃되면 touched 표시만 하고 즉시 .invalid 적용은 보류
+            input.classList.add('touched');
+            }
+        });
     });
-    // 포커스 잃을 때 처리 (필요 시 유효성 검사 수행)
-    input.addEventListener('blur', () => {
-    if (!input.value.trim()) {
-        // 빈 값인 채 포커스 아웃되면 touched 표시만 하고 즉시 .invalid 적용은 보류
-        input.classList.add('touched');
-    }
-    });
-});
 }
 
 // DOM 로드 후에 함수 호출
