@@ -209,30 +209,6 @@ startBtn.addEventListener('click', async (e) => {      // ① e 추가
   }
 });
 
-// const startBtn = document.getElementById('startBtn');
-
-// // 회의 시작 버튼 클릭 이벤트 리스너
-// startBtn.addEventListener("click", async () => {
-//     // 유효성 검사 실패 시 알림 및 return
-//     if (!validateAllInputs()) {
-//         console.log("startBtn validateAllInputs : ", validateAllInputs);
-//         alert("모든 필드를 입력한 후에 회의를 시작할 수 있습니다.");
-//         // 유효하지 않으면 동작 중단
-//         e.preventDefault();
-
-//         return;
-//     } else {
-        
-//         alert("회의가 시작되었습니다.");
-//     }
-
-//     const stream = await getMicStream(); //마이크 스트림 가져오기
-//     connectProcessor(); //오디오 프로세서 연결
-//     startTimer(); //타이머 시작
-//     sendRequest("startMeeting", null, null); //회의 시작 요청
-// });
-
-
 document.getElementById("stopBtn").addEventListener("click", async () => {
     processor.disconnect(); // 프로세서 연결 해제
     micStream.disconnect(); // 마이크 스트림 해제
@@ -329,7 +305,8 @@ function validateAllInputs() {
 
 // 입력 필드들에 이벤트 리스너를 추가하는 함수 구현
 function addEventListenersToInputs() {
-const inputs = document.querySelectorAll('#meetingForm input');
+    const inputs = document.querySelectorAll('input, select, textarea');
+// const inputs = document.querySelectorAll('#meetingForm input');
 inputs.forEach(input => {
     // 입력 중일 때 실시간 유효성 검사 표시 제거
     input.addEventListener('input', () => {

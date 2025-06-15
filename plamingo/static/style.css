@@ -222,7 +222,7 @@ select.invalid {
     border-color: red;
 }
 
-.input-row.row.invalid select {
+.input-row.row.invalid select:invalid {
     color: red;
     border-color: red;
 }
