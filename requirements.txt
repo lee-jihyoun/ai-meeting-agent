@@ -4,3 +4,4 @@ python-dotenv == 1.1.0
 flask
 requests
 azure-storage-blob
+openai == 1.82.1
