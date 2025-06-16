@@ -3,14 +3,15 @@ from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
 from openai import AzureOpenAI, OpenAIError
 
+# 현재 파일 기준으로 .env의 절대경로 생성
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dotenv_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=dotenv_path)
+
 
 # blob에 업로드: .wav, .txt, .json. .md -> blob에 올라간 txt를 그대로 ai가 사용
 def summarize_meeting_notes(info, file_name):
     print("AI가 요약을 시작합니다.")
-    # ─────────────────── 환경 변수 로딩 ───────────────────
-    load_dotenv()   # .env 파일에 ① AZURE_OPENAI_API_KEY ② AZURE_OPENAI_ENDPOINT
-                    # ③ BLOB_CONNECTION_STRING ④ CONTAINER_NAME ⑤ BLOB_NAME 등
-
     # TODO: meeting-text 컨테이너에서 회의록 작성 완료된 blob은 별도 컨테이너로 이동
     container_name = "meeting-text"
 
