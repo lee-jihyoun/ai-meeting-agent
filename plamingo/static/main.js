@@ -184,30 +184,36 @@ function sendRequest(meetingAction, sas_url, filename) {
 }
 
 const startBtn = document.getElementById('startBtn');
+startBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
 
-// 회의 시작 버튼 클릭 이벤트 리스너
-startBtn.addEventListener('click', async (e) => {      // ① e 추가
-  // (form 태그가 있고 버튼이 type="submit"이면 ↓ 주석 해제)
-  e.preventDefault();    // 기본 submit 동작 차단
+  const { emptyInvalid, emailInvalid, allValid } = validateAllInputs();
 
-  /* 1) 사용자 입력 검증 */
-  if (!validateAllInputs()) {
-    alert('모든 필드를 입력한 후에 회의를 시작할 수 있습니다.');
-    return;                       // 검증 실패 → 더 진행 X
+  if (!allValid) {
+    // 1) 필수값이 비어 있으면 그 메시지 우선
+    if (emptyInvalid) {
+      alert('모든 필드를 입력한 후에 회의를 시작할 수 있습니다.');
+    }
+    // 2) 공란은 없는데 이메일 형식이 틀렸을 때
+    else if (emailInvalid) {
+      alert('올바른 형식의 이메일을 입력해 주세요.');
+    }
+    return;            // 검증 실패 → 회의 시작 중단
   }
 
-  /* 2) 여기부터는 모든 필드가 유효할 때만 실행 */
+  /* 모든 검증 통과 → 회의 시작 */
   try {
-    const stream = await getMicStream();  // 마이크 권한 요청
-    connectProcessor();                   // 오디오 프로세서 연결
-    startTimer();                         // 경과 타이머 시작
-    await sendRequest('startMeeting', null, null); // 서버 알림
+    const stream = await getMicStream();
+    connectProcessor();
+    startTimer();
+    await sendRequest('startMeeting', null, null);
     alert('회의가 시작되었습니다.');
   } catch (err) {
     console.error('회의 시작 중 오류:', err);
     alert('마이크 권한 거부 또는 네트워크 오류가 발생했습니다.');
   }
 });
+
 
 document.getElementById("stopBtn").addEventListener("click", async () => {
     // 1. 버튼 숨기고 로딩 표시
@@ -282,53 +288,58 @@ function removeAttendeeRow(button) {
     document.getElementById("attendees").removeChild(row); //부모 요소에서 행 제거
 }
 
-// 유효성 검사 및 invalid 클래스 적용 함수
+/* =========================================================
+   모든 입력 유효성 검사
+   └ return: { emptyInvalid: bool, emailInvalid: bool, allValid: bool }
+   ========================================================= */
 function validateAllInputs() {
-    let allValid = true;
-    const attendeeRows = document.querySelectorAll('.input-row.row');
-    attendeeRows.forEach(row => {
-        const inputs = row.querySelectorAll('input[required], select[required], textarea[required]');
-        const isInvalid = Array.from(inputs).some(input => 
-            input.value.trim() === '' || (input.tagName === 'SELECT' && input.selectedIndex === 0)
-        );
-        if (isInvalid) {
-            row.classList.add('invalid');
-            allValid = false;
-        } else {
-            row.classList.remove('invalid');
-        }
-    });
-    // 기타 필수 입력 필드(회의 제목, 회의 내용 등)도 필요하다면 여기서 추가
-    const otherInputs = document.querySelectorAll('input[required], textarea[required], select[required]:not(.input-row.row input, .input-row.row select)');
-    otherInputs.forEach(input => {
-        if(input.value.trim() === '' || (input.tagName === 'SELECT' && input.selectedIndex === 0)) {
-            input.classList.add('invalid');
-            allValid = false;
-        } else {
-            input.classList.remove('invalid');
-        }
-    });
-    // startBtn.disabled = !allValid; -> 필요없는 코드
-    return allValid;
+  let emptyInvalid = false;   // 필수값 누락
+  let emailInvalid = false;   // 이메일 형식·도메인 오류
+
+  /* 1) 페이지의 모든 input / select / textarea 순회 */
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+
+    /* 1-A) 공란(또는 SELECT 미선택) 여부 우선 확인 */
+    const isBlank = !el.value.trim() ||
+                    (el.tagName === 'SELECT' && el.selectedIndex === 0);
+
+    if (isBlank) {
+      el.classList.add('invalid');
+      emptyInvalid = true;
+      return;                       // 공란이면 형식검사는 볼 필요 X
+    }
+
+    /* 1-B) 형식 검증 (= HTML5 checkValidity) */
+    if (!el.checkValidity()) {      // 여기서 이메일·숫자범위·pattern 검사 (html에 있는 type=email을 브라우저에서 검사)
+      el.classList.add('invalid');
+      if (el.id === 'writer-email') emailInvalid = true;
+      else                          emptyInvalid = true;   // 드물지만 pattern 있는 다른 필드
+    } else {
+      el.classList.remove('invalid');
+    }
+  });
+
+  return {
+    emptyInvalid,
+    emailInvalid,
+    allValid: !(emptyInvalid || emailInvalid)
+  };
 }
 
-// 입력 필드들에 이벤트 리스너를 추가하는 함수 구현
-function addEventListenersToInputs() {
-    const inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-        // 입력 중일 때 실시간 유효성 검사 표시 제거
-        input.addEventListener('input', () => {
-        input.classList.remove('invalid');  // 예: .invalid 클래스 제거하여 오류 표시 리셋
-        });
-        // 포커스 잃을 때 처리 (필요 시 유효성 검사 수행)
-        input.addEventListener('blur', () => {
-        if (!input.value.trim()) {
-            // 빈 값인 채 포커스 아웃되면 touched 표시만 하고 즉시 .invalid 적용은 보류
-            input.classList.add('touched');
-            }
-        });
-    });
+
+function addEventListenersToInputs(nodeList) {
+  const inputs = nodeList ?? document.querySelectorAll('input, select, textarea');
+
+  inputs.forEach(el => {
+    // 값이 바뀌면 빨간 표시만 없애 주고, 전체 검증은 하지 않음
+    const clearOnly = () => el.classList.remove('invalid');
+
+    el.addEventListener('input',  clearOnly);  // text·textarea
+    el.addEventListener('change', clearOnly);  // select
+  });
 }
+
+
 
 // DOM 로드 후에 함수 호출
 document.addEventListener('DOMContentLoaded', () => {
