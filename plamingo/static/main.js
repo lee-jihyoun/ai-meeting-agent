@@ -210,34 +210,43 @@ startBtn.addEventListener('click', async (e) => {      // ① e 추가
 });
 
 document.getElementById("stopBtn").addEventListener("click", async () => {
-    processor.disconnect(); // 프로세서 연결 해제
-    micStream.disconnect(); // 마이크 스트림 해제
-    const merged = mergeBuffers(pcmData); // PCM 데이터 병합
-    const wavBlob = encodeWAV(merged, audioCtx.sampleRate); // WAV 파일 생성
+    // 1. 버튼 숨기고 로딩 표시
+    stopBtn.style.display = "none";
+    loadingIndicator.style.display = "block";
 
-    pcmData = []; // PCM 데이터 초기화
+    // 2. 비동기 작업(예: 업로드, 서버 요청 등)
+    try {
+        stopTimer(); // 타이머 종료
+        processor.disconnect(); // 프로세서 연결 해제
+        micStream.disconnect(); // 마이크 스트림 해제
+        const merged = mergeBuffers(pcmData); // PCM 데이터 병합
+        const wavBlob = encodeWAV(merged, audioCtx.sampleRate); // WAV 파일 생성
 
-    // 1. 서버에서 SAS URL을 받아옵니다
-    filename = `plamingo_meeting_${startTimeFormatted}`;
-    // azure portal에서 CORS 허용을 해줘야 함.
+        pcmData = []; // PCM 데이터 초기화
 
-    //generate_sas_url API 호출
-    const wavFilename = `plamingo_meeting_${startTimeFormatted}.wav`;
-    const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavFilename)}`);
-    const data = await sasResponse.json();
-    const sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
-    console.log("SAS URL: ", sasUrl);
+        // 1. 서버에서 SAS URL을 받아옵니다
+        filename = `plamingo_meeting_${startTimeFormatted}`;
+        // azure portal에서 CORS 허용을 해줘야 함.
 
-    // 2. WAV Blob을 Azure Blob Storage에 업로드
-    await uploadWavToAzureBlob(wavBlob, sasUrl);
-    console.log("WAV 파일 업로드 완료");
+        //generate_sas_url API 호출
+        const wavFilename = `plamingo_meeting_${startTimeFormatted}.wav`;
+        const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavFilename)}`);
+        const data = await sasResponse.json();
+        const sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
+        console.log("SAS URL: ", sasUrl);
 
-    // 3. 회의 종료 요청
-    sendRequest("endMeeting", sasUrl, filename); //transcribe API 호출
-    stopTimer(); // 타이머 종료
+        // 2. WAV Blob을 Azure Blob Storage에 업로드
+        //TODO: 예외처리 추가. 예외 발생 시 재시도 로직 추가
+        await uploadWavToAzureBlob(wavBlob, sasUrl);
+        console.log("WAV 파일 업로드 완료");
 
-    // TODO: 화면에 api 상태 표시??
-    document.getElementById("startBtn").style.display = "inline-block"; // 시작 버튼 보이기
+        // 3. 회의 종료 요청
+        sendRequest("endMeeting", sasUrl, filename); //transcribe API 호출
+    } finally {
+        // 3. 작업 완료 후 로딩 숨기고 회의 시작 버튼 표시
+        loadingIndicator.style.display = "none";
+        startBtn.style.display = "block";
+    }
 });
 
 // 참석자 입력행 추가 함수

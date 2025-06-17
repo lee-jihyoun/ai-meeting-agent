@@ -65,6 +65,7 @@ def summarize_meeting_notes(info, file_name):
     12. 응답이 길어질 경우, 반드시 JSON 전체를 반환하라.
     13. action_items 등 일부만 반환해도 좋으니 반드시 완전한 JSON만 반환하라
     10. 백틱( ``` ) 코드펜스, Markdown 문법은 절대 사용하지 마라
+    11. 최종 결과물의 글자 수는 2000자 이내로 작성하라.
     
     # 입력
     회의 제목 : {title}
@@ -221,7 +222,7 @@ def summarize_meeting_notes(info, file_name):
         resp = client.chat.completions.create(
             model       = "plamingo-gpt-4o",        # ← 포털에서 배포한 Deployment 이름
             temperature = 0.2,
-            max_tokens  = 2000,
+            max_tokens  = 4000,
             messages=[
                 {"role": "system", "content": SYSTEM_MSG},
                 {"role": "user",   "content": user_prompt}
