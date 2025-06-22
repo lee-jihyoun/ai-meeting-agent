@@ -132,6 +132,20 @@ async function uploadWavToAzureBlob(file, sasUrl) {
     // alert("업로드 완료");
 }
 
+async function uploadWithRetry(file, sasUrl, maxAttempts = 3) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await uploadWavToAzureBlob(file, sasUrl);
+        return; // 성공하면 함수 종료
+      } catch (e) {
+        if (attempt === maxAttempts) throw e;
+        // 잠깐 대기 후 재시도(첫번째 실패 후 1초 뒤에 재시도. 2번째 실패 후 2초 뒤에 재시도)
+        await new Promise(res => setTimeout(res, 1000 * attempt));
+      }
+    }
+  }
+
+  
 // 요청을 보내는 함수
 function sendRequest(meetingAction, sas_url, filename) {
     const title = document.getElementById('meeting-title').value;
@@ -253,7 +267,9 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
 
         // 2. WAV Blob을 Azure Blob Storage에 업로드
         //TODO: 예외처리 추가. 예외 발생 시 재시도 로직 추가
-        await uploadWavToAzureBlob(wavBlob, sasUrl);
+        //await uploadWavToAzureBlob(wavBlob, sasUrl);
+        uploadWithRetry(wavBlob, sasUrl);
+        
         console.log("WAV 파일 업로드 완료");
 
         // 3. 회의 종료 요청
