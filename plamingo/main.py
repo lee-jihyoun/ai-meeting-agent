@@ -8,6 +8,7 @@ from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPerm
 from transcribe_api.batch_transcription_api import req_batch_transcription_api, save_response_to_json, save_to_text, upload_txt_to_blob
 from report_api.meeting_agent import summarize_meeting_notes, make_json_to_html
 from transcribe_api.audio_upload import upload_to_blob
+from flask import send_from_directory
 
 app = Flask(__name__)
 load_dotenv()
@@ -113,6 +114,10 @@ def generate_sas():
     sas_url = f"{blob_url}?{sas_token}"
     print("SAS URL:", sas_url)
     return jsonify({'sas_url': sas_url})
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(app.root_path, 'robots.txt')
 
 
 if __name__ == '__main__':
