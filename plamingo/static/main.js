@@ -267,8 +267,8 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
 
         // 2. WAV Blob을 Azure Blob Storage에 업로드
         //TODO: 예외처리 추가. 예외 발생 시 재시도 로직 추가
-        //await uploadWavToAzureBlob(wavBlob, sasUrl);
-        uploadWithRetry(wavBlob, sasUrl);
+        await uploadWavToAzureBlob(wavBlob, sasUrl);
+        // uploadWithRetry(wavBlob, sasUrl);
         
         console.log("WAV 파일 업로드 완료");
 
