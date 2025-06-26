@@ -145,6 +145,7 @@ def save_to_text(output_dir):
 
 # # # [Step4] 회의 txt 파일을 blob storage에 업로드
 def upload_txt_to_blob(output_dir, info, file_name):
+    
     # BlobServiceClient 생성
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
@@ -161,7 +162,7 @@ def upload_txt_to_blob(output_dir, info, file_name):
 
     # info.json 업로드
     info_json = json.dumps(info, ensure_ascii=False)
-    blob_client_json = blob_service_client.get_blob_client(container=container_name, blob=f"{file_name}.json")
+    blob_client_json = blob_service_client.get_blob_client(container=container_name, blob=f"{file_name[-4]}.json")
     blob_client_json.upload_blob(info_json, overwrite=True)
     print(f"info 파일이 {container_name} 컨테이너에 {file_name}.json 이름으로 업로드되었습니다.")
 

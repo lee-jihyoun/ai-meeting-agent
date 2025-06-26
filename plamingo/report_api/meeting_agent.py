@@ -13,12 +13,13 @@ load_dotenv(dotenv_path=dotenv_path)
 def summarize_meeting_notes(info, file_name):
     print("AI가 요약을 시작합니다.")
     # TODO: meeting-text 컨테이너에서 회의록 작성 완료된 blob은 별도 컨테이너로 이동
+    
     container_name = "meeting-text"
 
     # ─────────────────── 1) Blob에서 STT 원문 가져오기 ───────────────────
     blob_service = BlobServiceClient.from_connection_string(os.getenv("BLOB_CONNECTION_STRING"))
 
-    blob_client = blob_service.get_container_client(container_name).get_blob_client(file_name+'.txt')
+    blob_client = blob_service.get_container_client(container_name).get_blob_client(file_name[:-4]+'.txt')
     # print("blob_client: ", blob_client)
 
     stt_text = blob_client.download_blob().content_as_text()
