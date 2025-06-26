@@ -20,3 +20,6 @@ speech-service/output/
 *.wav
 *.pem
 *.crt
+
+# 로그 관련
+plamingo/log/
