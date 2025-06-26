@@ -19,7 +19,7 @@ def summarize_meeting_notes(info, file_name):
     # ─────────────────── 1) Blob에서 STT 원문 가져오기 ───────────────────
     blob_service = BlobServiceClient.from_connection_string(os.getenv("BLOB_CONNECTION_STRING"))
 
-    blob_client = blob_service.get_container_client(container_name).get_blob_client(file_name[:-4]+'.txt')
+    blob_client = blob_service.get_container_client(container_name).get_blob_client(file_name+'.txt')
     # print("blob_client: ", blob_client)
 
     stt_text = blob_client.download_blob().content_as_text()
