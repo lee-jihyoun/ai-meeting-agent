@@ -190,20 +190,19 @@ function sendRequest(meetingAction, sas_url, filename) {
 
     //회의 종료
     else if (meetingAction == 'endMeeting') {
-        filename = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}.wav`; //파일 이름 설정
-        fetch(`/transcribe?sas_url=${sas_url}&file_name=${encodeURIComponent(filename)}`, { //서버 요청
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(info)
-        })
-        .then(res => {
-            console.log('서버 응답:', res); // ① 서버 응답 확인
-            if (!200) throw new Error('HTTP ' + res.status);
-            return res.json();                // ① JSON 파싱
-        })
-        .catch(console.error);
+      fetch(`/transcribe?sas_url=${sas_url}&file_name=${encodeURIComponent(filename)}`, { //서버 요청
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(info)
+      })
+      .then(res => {
+          console.log('서버 응답:', res); // ① 서버 응답 확인
+          if (!200) throw new Error('HTTP ' + res.status);
+          return res.json();                // ① JSON 파싱
+      })
+      .catch(console.error);
     }
 }
 
@@ -259,8 +258,9 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
         // azure portal에서 CORS 허용을 해줘야 함.
 
         //generate_sas_url API 호출
-        const wavFilename = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}.wav`;
-        const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavFilename)}`);
+        wavfile = filename + '.wav';
+        // console.log("WAV 파일 이름: ", wavfile);
+        const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavfile)}`);
         const data = await sasResponse.json();
         const sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
         console.log("SAS URL: ", sasUrl);
