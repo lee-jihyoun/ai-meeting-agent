@@ -230,8 +230,8 @@ startBtn.addEventListener('click', async (e) => {
     const stream = await getMicStream();
     connectProcessor();
     startTimer();
-    await sendRequest('startMeeting', null, null);
     alert('회의가 시작되었습니다.');
+    await sendRequest('startMeeting', null, null);
   } catch (err) {
     console.error('회의 시작 중 오류:', err);
     alert('마이크 권한 거부 또는 네트워크 오류가 발생했습니다.');
