@@ -278,8 +278,13 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
           // console.log("WAV 파일 이름: ", wavfile);
           const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavfile)}`);
           const data = await sasResponse.json();
-          const sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
+          sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
           console.log("SAS URL: ", sasUrl);
+          if (!sasUrl) {
+            console.error("SAS URL이 비어 있습니다:", sasUrl);
+            alert("업로드 URL 생성에 실패했습니다. 다시 시도해 주세요.");
+            return;
+          }
         } catch (error) {
           console.error("SAS URL 생성 중 오류 발생:", error);
           alert("SAS URL 생성 중 오류가 발생했습니다. 다시 시도해 주세요.");
