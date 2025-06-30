@@ -268,28 +268,43 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
 
         pcmData = []; // PCM 데이터 초기화
 
-        // 1. 서버에서 SAS URL을 받아옵니다
-        filename = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}`;
-        // azure portal에서 CORS 허용을 해줘야 함.
+        // 서버에서 SAS URL을 받아옴
+        let sasUrl;
+        try {
+          filename = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}`;
+          // azure portal에서 CORS 허용을 해줘야 함.
+          //generate_sas_url API 호출
+          wavfile = filename + '.wav';
+          // console.log("WAV 파일 이름: ", wavfile);
+          const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavfile)}`);
+          const data = await sasResponse.json();
+          const sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
+          console.log("SAS URL: ", sasUrl);
+        } catch (error) {
+          console.error("SAS URL 생성 중 오류 발생:", error);
+          alert("SAS URL 생성 중 오류가 발생했습니다. 다시 시도해 주세요.");
+          return; // 오류 발생 시 함수 종료
+        }
 
-        //generate_sas_url API 호출
-        wavfile = filename + '.wav';
-        // console.log("WAV 파일 이름: ", wavfile);
-        const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavfile)}`);
-        const data = await sasResponse.json();
-        const sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
-        console.log("SAS URL: ", sasUrl);
+        // WAV Blob을 Azure Blob Storage에 업로드
+        try{
+          await uploadWavToAzureBlob(wavBlob, sasUrl);
+          // uploadWithRetry(wavBlob, sasUrl);
+          console.log("WAV 파일 업로드 완료");
+        } catch (error) {
+          console.error("WAV 파일 업로드 중 오류 발생:", error);
+          alert("WAV 파일 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.");
+          return; // 오류 발생 시 함수 종료
+        }
 
-        // 2. WAV Blob을 Azure Blob Storage에 업로드
-        //TODO: 예외처리 추가. 예외 발생 시 재시도 로직 추가
-        await uploadWavToAzureBlob(wavBlob, sasUrl);
-        // uploadWithRetry(wavBlob, sasUrl);
-        
-        console.log("WAV 파일 업로드 완료");
-
-        // 3. 회의 종료 요청
+        // 회의 종료 요청
         sendRequest("endMeeting", sasUrl, filename); //transcribe API 호출
-    } finally {
+    } catch (error) {
+        console.error("회의 종료 중 오류 발생:", error);
+        alert("회의 종료 중 오류가 발생했습니다. 다시 시도해 주세요.");
+        return; // 오류 발생 시 함수 종료
+    } 
+    finally {
         // 3. 작업 완료 후 로딩 숨기고 회의 시작 버튼 표시
         loadingIndicator.style.display = "none";
         startBtn.style.display = "block";
