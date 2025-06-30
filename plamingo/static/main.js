@@ -116,19 +116,34 @@ function makeBase62(length=6){
     return result;
 }
 
-async function uploadWavToAzureBlob(file, sasUrl) {
-    const response = await fetch(sasUrl, {
+async function uploadWavToAzureBlob(file, sasUrl, timeoutMs = 600000*60) { //1시간
+    console.log("wav 파일 사이즈:", file.size);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(sasUrl, {
         method: "PUT",
         headers: {
             "x-ms-blob-type": "BlockBlob",
             "Content-Type": "audio/wav"
         },
-        body: file
+        body: file,
+        signal: controller.signal
     });
-
     if (!response.ok) {
-        throw new Error("업로드 실패: " + response.statusText);
+      throw new Error("업로드 실패: " + response.statusText);
     }
+    } catch (error) {
+      if(error.name === 'AbortError') {
+        throw new Error("업로드 시간 초과");
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId); //타임아웃 타이머 해제(메모리 누수 방지)
+    }
+    
     // alert("업로드 완료");
 }
 
