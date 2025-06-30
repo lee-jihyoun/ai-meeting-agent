@@ -4,6 +4,7 @@ let startTimeFormatted; //회의시작 시간(yyyymmdd)
 let audioCtx, micStream, processor, pcmData = []; // 오디오 처리 관련 변수 
 const attendees = []; //참석자 목록 배열
 let filename; //파일 이름 변수
+let info; //회의 정보 변수
 
 // 타이머 시작 함수 
 function startTimer() {
@@ -107,6 +108,7 @@ function writeString(view, offset, str) {
     }
 }
 
+// 파일 이름에 Base62로 랜덤 문자 6자리를 추가하기 위한 함수
 function makeBase62(length=6){
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -159,66 +161,61 @@ async function uploadWithRetry(file, sasUrl, maxAttempts = 3) {
       }
     }
   }
-
   
-// 요청을 보내는 함수
-function sendRequest(meetingAction, sas_url, filename) {
-    const title = document.getElementById('meeting-title').value;
-    const content = document.getElementById('meeting-content').value;
-    const writerName = document.getElementById('writer-name').value;
-    const writerPosition = document.getElementById('writer-position').value;
-    const writerEmail = document.getElementById('writer-email').value;
+function startMeeting() {
+  const title = document.getElementById('meeting-title').value;
+  const content = document.getElementById('meeting-content').value;
+  const writerName = document.getElementById('writer-name').value;
+  const writerPosition = document.getElementById('writer-position').value;
+  const writerEmail = document.getElementById('writer-email').value;
 
-    const info =  {
-        meetingAction: meetingAction,
-        title: title,
-        content : content,
-        writer: [writerName, writerPosition, writerEmail],
-        attendees: attendees,
-        startTime: startTimeFormatted,
-    };
-    // 회의 시작
-    if (meetingAction == 'startMeeting') {
-        const attendeeInputs = document.querySelectorAll('.input-row'); //참석자 입력 필드 선택
-        attendees.length = 0; // 배열 초기화
+  info =  {
+      title: title,
+      content : content,
+      writer: [writerName, writerPosition, writerEmail],
+      attendees: attendees,
+      startTime: startTimeFormatted,
+  };
+  // 회의 시작
+  const attendeeInputs = document.querySelectorAll('.input-row'); //참석자 입력 필드 선택
+  attendees.length = 0; // 배열 초기화
 
-        attendeeInputs.forEach(row => {
-            const name = row.querySelector('.name-input').value; // 이름 가져오기
-            const position = row.querySelector('.position-input').value; // 직급 가져오기
-            const authorRole = row.querySelector('.role-input').value; // 역할 가져오기
+  attendeeInputs.forEach(row => {
+      const name = row.querySelector('.name-input').value; // 이름 가져오기
+      const position = row.querySelector('.position-input').value; // 직급 가져오기
+      const authorRole = row.querySelector('.role-input').value; // 역할 가져오기
 
-            if(name && position !== '직급 선택' && authorRole) { // 유효성 검사
-                attendees.push({ name, position, authorRole }); //유효한 참석자를 배열에 추가
-                console.log("sendRequest attendees : ", attendees)
-            }
-    });
+      if(name && position !== '직급 선택' && authorRole) { // 유효성 검사
+          attendees.push({ name, position, authorRole }); //유효한 참석자를 배열에 추가
+          console.log("attendees:", attendees)
+      }
+  });
 
-    // 비어 있는 참석자 배열 체크
-    if (attendees.length === 0) {
-        // TODO: 화면에 필수 값 경고 표시
-        console.warn('No valid attendees provided');
-        document.getElementById("response").innerText = 'Error: No valid attendees provided';
-        return;
-    }
-    console.log("sendRequest info : ", info);
-    }
+  // 비어 있는 참석자 배열 체크
+  if (attendees.length === 0) {
+      console.warn('No valid attendees provided');
+      document.getElementById("response").innerText = 'Error: No valid attendees provided';
+      return;
+  }
+  console.log("info:", info);
+  return info;
+}
 
-    //회의 종료
-    else if (meetingAction == 'endMeeting') {
-      fetch(`/transcribe?sas_url=${sas_url}&file_name=${encodeURIComponent(filename)}`, { //서버 요청
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(info)
-      })
-      .then(res => {
-          console.log('서버 응답:', res); // ① 서버 응답 확인
-          if (!200) throw new Error('HTTP ' + res.status);
-          return res.json();                // ① JSON 파싱
-      })
-      .catch(console.error);
-    }
+function endMeeting(sas_url, filename, info) {
+  //회의 종료
+  fetch(`/transcribe?sas_url=${sas_url}&file_name=${encodeURIComponent(filename)}`, { //서버 요청
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(info)
+  })
+  .then(res => {
+      console.log('서버 응답:', res); // ① 서버 응답 확인
+      if (!200) throw new Error('HTTP ' + res.status);
+      return res.json();                // ① JSON 파싱
+  })
+  .catch(console.error);
 }
 
 const startBtn = document.getElementById('startBtn');
@@ -245,7 +242,7 @@ startBtn.addEventListener('click', async (e) => {
     connectProcessor();
     startTimer();
     alert('회의가 시작되었습니다.');
-    await sendRequest('startMeeting', null, null);
+    info = await startMeeting(); //전역변수에 저장
   } catch (err) {
     console.error('회의 시작 중 오류:', err);
     alert('마이크 권한 거부 또는 네트워크 오류가 발생했습니다.');
@@ -303,7 +300,7 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
         }
 
         // 회의 종료 요청
-        sendRequest("endMeeting", sasUrl, filename); //transcribe API 호출
+        endMeeting(sasUrl, filename, info); //transcribe API 호출
     } catch (error) {
         console.error("회의 종료 중 오류 발생:", error);
         alert("회의 종료 중 오류가 발생했습니다. 다시 시도해 주세요.");
