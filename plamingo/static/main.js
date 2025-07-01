@@ -118,7 +118,7 @@ function makeBase62(length=6){
     return result;
 }
 
-async function uploadWavToAzureBlob(file, sasUrl, timeoutMs = 600000*120) { //2시간
+async function uploadWavToAzureBlob(file, sasUrl, timeoutMs = 600000*180) { //3시간
     console.log("wav 파일 사이즈:", file.size);
 
     const controller = new AbortController();
