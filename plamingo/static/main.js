@@ -511,3 +511,26 @@ window.onload = () => {
     addEventListenersToInputs(allInputs);
     document.getElementById('meeting-title').focus();
 };
+
+
+// 서버 상태 체크 및 다운 시 배너 표시
+async function checkServerStatus() {
+  try {
+    const res = await fetch('/healthcheck', { cache: 'no-store' }); // 캐시 무시
+    if (!res.ok) throw new Error('서버 응답 오류');
+    hideServerDownBanner(); // 정상일 때 배너 숨김
+  } catch (e) {
+    showServerDownBanner(); // 서버 다운 시 배너 표시
+    stopTimer();
+  }
+}
+
+setInterval(checkServerStatus, 5000); // 5초마다 체크
+
+function showServerDownBanner() {
+  // 화면 상단이나 중앙에 서버 장애 안내 배너 표시
+  document.getElementById('serverStatus').style.display = 'block';
+}
+function hideServerDownBanner() {
+  document.getElementById('serverStatus').style.display = 'none';
+}

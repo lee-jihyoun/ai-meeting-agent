@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <div id="serverStatus" class="server-status-banner">
+    서버와 연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.
+  </div>
   <title>Plamingo</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <!-- Favicon 설정 : 404 에러 방지-->
@@ -86,7 +89,6 @@
       <span class="spinner"></span>
     </div>
   </div>
-
   <!-- </form> -->
   <script src="{{ url_for('static', filename='main.js') }}"></script>
   

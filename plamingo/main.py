@@ -4,11 +4,23 @@ from dotenv import load_dotenv
 import sys
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
-from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
+from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 from transcribe_api.batch_transcription_api import req_batch_transcription_api, save_response_to_json, save_to_text, upload_txt_to_blob
 from report_api.meeting_agent import summarize_meeting_notes, make_json_to_html
 from transcribe_api.audio_upload import upload_to_blob
 from flask import send_from_directory
+import logging
+
+
+# /healthcheck 요청은 로그에서 제외
+class HealthCheckFilter(logging.Filter):
+    def filter(self, record):
+        return '/healthcheck' not in record.getMessage()
+
+
+# 반드시 Flask 앱 생성 직후, 라우트 정의 전에 추가
+logging.getLogger("werkzeug").addFilter(HealthCheckFilter())
+
 
 app = Flask(__name__)
 load_dotenv()
@@ -125,9 +137,15 @@ def generate_sas():
     print("SAS URL:", sas_url)
     return jsonify({'sas_url': sas_url})
 
+
 @app.route('/robots.txt')
 def robots_txt():
     return send_from_directory(app.root_path, 'robots.txt')
+
+
+@app.route('/healthcheck')
+def healthcheck():
+    return 'ok', 200
 
 
 if __name__ == '__main__':
