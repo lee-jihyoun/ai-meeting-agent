@@ -1,0 +1,10 @@
+{
+  "successfulTranscriptionsCount": 1,
+  "failedTranscriptionsCount": 0,
+  "details": [
+    {
+      "source": "https://staz01plamingo01.blob.core.windows.net/meeting-audio/plamingo_meeting_20250701_155936_sI4lZ6.wav?st=2025-07-01T06:44:39Z",
+      "status": "Succeeded"
+    }
+  ]
+}

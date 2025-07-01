@@ -95,7 +95,17 @@ def generate_sas():
     blob_file_name = request.args.get('filename')  # 쿼리스트링에서 filename 파라미터 추출
     if not blob_file_name:
         return jsonify({'error': 'filename is required'}), 400
-    container_name = "meeting-audio"
+    
+    # 확장자 확인
+    ext = os.path.splitext(blob_file_name)[1].lower()
+
+    # 컨테이너 선택
+    if ext == '.wav':
+        container_name = 'meeting-audio'
+    else:
+        container_name = 'meeting-files'      # PDF, DOCX, 이미지 등
+
+    # container_name = "meeting-audio"
 
     # SAS 토큰 생성
     sas_token = generate_blob_sas(
@@ -121,5 +131,4 @@ def robots_txt():
 
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0', port='9090')
     app.run(host='0.0.0.0', port='443', ssl_context=('cert.pem', 'key.pem'))

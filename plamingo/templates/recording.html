@@ -52,6 +52,22 @@
     </div>
   </div>
 
+  <div class="container">
+    <h3><label>파일 첨부 </label></h3>
+
+    <div class="row">
+      <!-- 숨겨둔 실제 파일 입력 -->
+      <input type="file"
+            id="docFile"
+            accept=".pdf,.ppt,.pptx,.png,.jpg,.jpeg,.tif,.tiff"
+            style="display:none" multiple />
+
+      <!-- 사용자가 클릭할 버튼 -->
+      <button id="docSelectBtn" type="button">파일 선택</button>
+      <span id="docList" style="margin-left:8px;color:#555">선택된 파일 없음</span>
+    </div>
+  </div>
+
   <br>
   <br>
   <div class="container">
