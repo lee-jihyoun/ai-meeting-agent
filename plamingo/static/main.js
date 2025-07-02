@@ -218,88 +218,72 @@ function endMeeting(sas_url, filename, info) {
   .catch(console.error);
 }
 
-// 파일 첨부 기능
-const docInput     = document.getElementById('docFile');
-const docSelectBtn = document.getElementById('docSelectBtn');
-const docListSpan  = document.getElementById('docList');
+// // 파일 첨부 기능
+// const docInput     = document.getElementById('docFile');
+// const docSelectBtn = document.getElementById('docSelectBtn');
+// const docListSpan  = document.getElementById('docList');
 
-docSelectBtn.addEventListener('click', () => docInput.click());
+// docSelectBtn.addEventListener('click', () => docInput.click());
 
-docInput.addEventListener('change', () => {
-  const names = [...docInput.files].map(f => f.name).join(', ');
-  docListSpan.textContent = names || '선택된 파일 없음';
-});
+// docInput.addEventListener('change', () => {
+//   const names = [...docInput.files].map(f => f.name).join(', ');
+//   docListSpan.textContent = names || '선택된 파일 없음';
+// });
 
-/* ========================================================
-   Blob 업로드 공통 함수 (타임아웃·MIME 자동 지정)
-   ======================================================== */
-async function uploadFileToAzureBlob(file, sasUrl, timeoutMs = 600_000) {
-  console.log('[UPLOAD] 시작:', file.name, 'size:', file.size);
+// /* ========================================================
+//    Blob 업로드 공통 함수 (타임아웃·MIME 자동 지정)
+//    ======================================================== */
+// async function uploadFileToAzureBlob(file, sasUrl, timeoutMs = 600_000) {
+//   console.log('[UPLOAD] 시작:', file.name, 'size:', file.size);
 
-  const controller = new AbortController();
-  const timeoutId  = setTimeout(() => controller.abort(), timeoutMs);
+//   const controller = new AbortController();
+//   const timeoutId  = setTimeout(() => controller.abort(), timeoutMs);
 
-  try {
-    const res = await fetch(sasUrl, {
-      method : 'PUT',
-      headers: {
-        'x-ms-blob-type': 'BlockBlob',
-        'Content-Type'  : file.type || 'application/octet-stream'
-      },
-      body   : file,
-      signal : controller.signal
-    });
-    if (!res.ok) throw new Error('업로드 실패: ' + res.statusText);
-    console.log('[UPLOAD] 성공:', file.name);
-  } catch (err) {
-    if (err.name === 'AbortError') throw new Error('업로드 시간 초과');
-    throw err;
-  } finally {
-    clearTimeout(timeoutId);         // 메모리 누수 방지
-  }
-}
+//   try {
+//     const res = await fetch(sasUrl, {
+//       method : 'PUT',
+//       headers: {
+//         'x-ms-blob-type': 'BlockBlob',
+//         'Content-Type'  : file.type || 'application/octet-stream'
+//       },
+//       body   : file,
+//       signal : controller.signal
+//     });
+//     if (!res.ok) throw new Error('업로드 실패: ' + res.statusText);
+//     console.log('[UPLOAD] 성공:', file.name);
+//   } catch (err) {
+//     if (err.name === 'AbortError') throw new Error('업로드 시간 초과');
+//     throw err;
+//   } finally {
+//     clearTimeout(timeoutId);         // 메모리 누수 방지
+//   }
+// }
 
-/* ========================================================
-   업로드 재시도 래퍼
-   ======================================================== */
-async function uploadWithRetry(file, sasUrl, maxAttempts = 3) {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      await uploadFileToAzureBlob(file, sasUrl);
-      return;                         // 성공 → 함수 종료
-    } catch (e) {
-      if (attempt === maxAttempts) throw e;
-      console.warn(`[재시도 ${attempt}]`, e.message);
-      await new Promise(r => setTimeout(r, 1000 * attempt));
-    }
-  }
-}
+// async function uploadDocs(files) {
+//   for (const file of files) {
+//     /* ➊ 문서용 blob 이름과 함께 SAS URL 발급 */
+//     const blobName = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}_${file.name}`;
+//     let sasUrl;
+//     try {
+//       const res        = await fetch(`/generate_sas_url?filename=${encodeURIComponent(blobName)}`);
+//       ({ sas_url: sasUrl } = await res.json());          // ← 문서 전용 SAS URL
+//       if (!sasUrl) throw new Error('SAS URL 생성 실패');
+//     } catch (err) {
+//       console.error('[DOC] SAS URL 오류:', err);
+//       alert(`"${file.name}" 업로드 URL 생성에 실패했습니다.`);
+//       continue;                                          // 다음 문서로
+//     }
 
-async function uploadDocs(files) {
-  for (const file of files) {
-    /* ➊ 문서용 blob 이름과 함께 SAS URL 발급 */
-    const blobName = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}_${file.name}`;
-    let sasUrl;
-    try {
-      const res        = await fetch(`/generate_sas_url?filename=${encodeURIComponent(blobName)}`);
-      ({ sas_url: sasUrl } = await res.json());          // ← 문서 전용 SAS URL
-      if (!sasUrl) throw new Error('SAS URL 생성 실패');
-    } catch (err) {
-      console.error('[DOC] SAS URL 오류:', err);
-      alert(`"${file.name}" 업로드 URL 생성에 실패했습니다.`);
-      continue;                                          // 다음 문서로
-    }
-
-    /* ➋ 발급받은 SAS URL로 업로드 (재시도 포함) */
-    try {
-      await uploadWithRetry(file, sasUrl);               // MIME 자동 지정
-      console.log('[DOC] 업로드 완료:', file.name);
-    } catch (err) {
-      console.error('[DOC] 업로드 실패:', err);
-      alert(`"${file.name}" 업로드 중 오류가 발생했습니다.`);
-    }
-  }
-}
+//     /* ➋ 발급받은 SAS URL로 업로드 (재시도 포함) */
+//     try {
+//       await uploadWithRetry(file, sasUrl);               // MIME 자동 지정
+//       console.log('[DOC] 업로드 완료:', file.name);
+//     } catch (err) {
+//       console.error('[DOC] 업로드 실패:', err);
+//       alert(`"${file.name}" 업로드 중 오류가 발생했습니다.`);
+//     }
+//   }
+// }
 
 
 // 유효성 검증 기능
@@ -385,18 +369,15 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
           return; // 오류 발생 시 함수 종료
         }
 
-        // 파일이 선택된 경우만 문서 업로드
-        if (docInput.files.length) {               // 파일이 선택된 경우만
-          try {
-            await uploadDocs(docInput.files);
-            console.log('[DOCS] 업로드 완료');
-          } catch (err) {
-            console.error('[DOCS] 업로드 오류:', err);
-            alert('문서 업로드 중 오류가 발생했습니다. WAV 업로드는 완료되었으니 이후 단계는 계속 진행합니다.');
-          }
-        }
-        // if (docInput.files.length) {
-        //   await uploadDocs(docInput.files);   // 문서 전용 SAS URL 발급 + 업로드
+        // // 파일이 선택된 경우만 문서 업로드
+        // if (docInput.files.length) {               // 파일이 선택된 경우만
+        //   try {
+        //     await uploadDocs(docInput.files);
+        //     console.log('[DOCS] 업로드 완료');
+        //   } catch (err) {
+        //     console.error('[DOCS] 업로드 오류:', err);
+        //     alert('문서 업로드 중 오류가 발생했습니다. WAV 업로드는 완료되었으니 이후 단계는 계속 진행합니다.');
+        //   }
         // }
 
 
