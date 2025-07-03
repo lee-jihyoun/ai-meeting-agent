@@ -4,15 +4,29 @@ let startTimeFormatted; //회의시작 시간(yyyymmdd)
 let audioCtx, micStream, processor, pcmData = []; // 오디오 처리 관련 변수 
 const attendees = []; //참석자 목록 배열
 let filename; //파일 이름 변수
+let randomString; //랜덤 문자열 변수
 let info; //회의 정보 변수
+let audioChunkSeq = 0; // 30분 청크 파일 시퀀스 
+
 
 // 타이머 시작 함수 
 function startTimer() {
-    startTime = Date.now(); // 현재 시간을 시작 시간으로 설정
-    startTimeFormatted = formatDateLocal(startTime)
-    timerInterval = setInterval(updateTimer, 1000); //1초마다 타이머 업데이트 
-    document.getElementById("startBtn").style.display = "none"; //시작 버튼 숨기기 
-    document.getElementById("stopBtn").style.display = "inline-block"; //종료 버튼 보이기
+  startTime = Date.now();
+  startTimeFormatted = formatDateLocal(startTime);
+  timerInterval = setInterval(updateTimer, 1000);
+
+  // 30분(1800000ms)마다 업로드 실행
+  randomString = makeBase62(6); //랜덤 문자열 생성
+  runInterval();
+  
+  document.getElementById("startBtn").style.display = "none";
+  document.getElementById("stopBtn").style.display = "inline-block";
+}
+
+async function runInterval() {
+  await uploadAudioChunk(audioChunkSeq);
+  setTimeout(runInterval, 60000); //1분
+  audioChunkSeq ++;
 }
 
 //타이머 업데이트 함수
@@ -27,6 +41,7 @@ function updateTimer() {
 //타이머 종료 함수
 function stopTimer() {
     clearInterval(timerInterval); //타이머 인터벌 종료
+    clearInterval(runInterval); // 30분 업로드 타이머도 정리
     endTime = Date.now()
     document.getElementById("stopBtn").style.display = "none"; //종료 버튼 숨기기
 }
@@ -116,6 +131,49 @@ function makeBase62(length=6){
         result += chars.charAt(Math.floor(Math.random() * chars.length)); //랜덤 문자열 생성
     }
     return result;
+}
+
+async function uploadAudioChunk(audioChunkSeq) {
+  console.log("업로드 시작: audioChunkSeq =", audioChunkSeq);
+  if (pcmData.length === 0) return; // 데이터 없으면 패스
+
+  // 1. PCM 데이터 병합 및 WAV 변환
+  const merged = mergeBuffers(pcmData);
+  const wavBlob = encodeWAV(merged, audioCtx.sampleRate);
+
+  // 2. 파일명 생성 (타임스탬프+랜덤)
+  const chunkFilename = `plamingo_meeting_${startTimeFormatted}_${randomString}_${audioChunkSeq}.wav`;
+
+  // 3. SAS URL 요청
+  let sasUrl;
+  try {
+      const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(chunkFilename)}`);
+      const data = await sasResponse.json();
+      sasUrl = data.sas_url;
+      if (!sasUrl) {
+          console.error("SAS URL이 비어 있습니다:", sasUrl);
+          return;
+      }
+  } catch (error) {
+      console.error("SAS URL 생성 중 오류 발생:", error);
+      return;
+  }
+
+  // 4. 업로드
+  try {
+      await uploadWavToAzureBlob(wavBlob, sasUrl);
+      console.log("30분 구간 WAV 파일 업로드 완료:", chunkFilename);
+  } catch (error) {
+      console.error("30분 구간 WAV 파일 업로드 중 오류:", error);
+      return;
+  }
+
+  // 5. 업로드 후 PCM 데이터 초기화 (다음 구간을 위해)
+  pcmData = [];
+  audioChunkSeq++; // 청크 시퀀스 증가
+
+  // 서버 호출 
+  endMeeting(sasUrl, filename, info); //transcribe API 호출
 }
 
 async function uploadWavToAzureBlob(file, sasUrl, timeoutMs = 600000*180) { //3시간
@@ -278,7 +336,7 @@ async function uploadWithRetry(file, sasUrl, maxAttempts = 3) {
 async function uploadDocs(files) {
   for (const file of files) {
     /* ➊ 문서용 blob 이름과 함께 SAS URL 발급 */
-    const blobName = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}_${file.name}`;
+    const blobName = `plamingo_meeting_${startTimeFormatted}_${randomString}_${file.name}`;
     let sasUrl;
     try {
       const res        = await fetch(`/generate_sas_url?filename=${encodeURIComponent(blobName)}`);
@@ -351,39 +409,39 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
 
         pcmData = []; // PCM 데이터 초기화
 
-        // 서버에서 SAS URL을 받아옴
-        let sasUrl;
-        try {
-          filename = `plamingo_meeting_${startTimeFormatted}_${makeBase62(6)}`;
-          // azure portal에서 CORS 허용을 해줘야 함.
-          //generate_sas_url API 호출
-          wavfile = filename + '.wav';
-          // console.log("WAV 파일 이름: ", wavfile);
-          const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavfile)}`);
-          const data = await sasResponse.json();
-          sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
-          console.log("SAS URL: ", sasUrl);
-          if (!sasUrl) {
-            console.error("SAS URL이 비어 있습니다:", sasUrl);
-            alert("업로드 URL 생성에 실패했습니다. 다시 시도해 주세요.");
-            return;
-          }
-        } catch (error) {
-          console.error("SAS URL 생성 중 오류 발생:", error);
-          alert("SAS URL 생성 중 오류가 발생했습니다. 다시 시도해 주세요.");
-          return; // 오류 발생 시 함수 종료
-        }
+        // // 서버에서 SAS URL을 받아옴
+        // let sasUrl;
+        // try {
+        //   filename = `plamingo_meeting_${startTimeFormatted}_${randomString}`;
+        //   // azure portal에서 CORS 허용을 해줘야 함.
+        //   //generate_sas_url API 호출
+        //   wavfile = filename + '.wav';
+        //   // console.log("WAV 파일 이름: ", wavfile);
+        //   const sasResponse = await fetch(`/generate_sas_url?filename=${encodeURIComponent(wavfile)}`);
+        //   const data = await sasResponse.json();
+        //   sasUrl = data.sas_url; // 서버에서 SAS URL을 받아옴
+        //   console.log("SAS URL: ", sasUrl);
+        //   if (!sasUrl) {
+        //     console.error("SAS URL이 비어 있습니다:", sasUrl);
+        //     alert("업로드 URL 생성에 실패했습니다. 다시 시도해 주세요.");
+        //     return;
+        //   }
+        // } catch (error) {
+        //   console.error("SAS URL 생성 중 오류 발생:", error);
+        //   alert("SAS URL 생성 중 오류가 발생했습니다. 다시 시도해 주세요.");
+        //   return; // 오류 발생 시 함수 종료
+        // }
 
-        // WAV Blob을 Azure Blob Storage에 업로드
-        try{
-          await uploadWavToAzureBlob(wavBlob, sasUrl);
-          // uploadWithRetry(wavBlob, sasUrl);
-          console.log("WAV 파일 업로드 완료");
-        } catch (error) {
-          console.error("WAV 파일 업로드 중 오류 발생:", error);
-          alert("WAV 파일 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.");
-          return; // 오류 발생 시 함수 종료
-        }
+        // // WAV Blob을 Azure Blob Storage에 업로드
+        // try{
+        //   await uploadWavToAzureBlob(wavBlob, sasUrl);
+        //   // uploadWithRetry(wavBlob, sasUrl);
+        //   console.log("WAV 파일 업로드 완료");
+        // } catch (error) {
+        //   console.error("WAV 파일 업로드 중 오류 발생:", error);
+        //   alert("WAV 파일 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.");
+        //   return; // 오류 발생 시 함수 종료
+        // }
 
         // 파일이 선택된 경우만 문서 업로드
         if (docInput.files.length) {               // 파일이 선택된 경우만
@@ -401,7 +459,7 @@ document.getElementById("stopBtn").addEventListener("click", async () => {
 
 
         // 회의 종료 요청
-        endMeeting(sasUrl, filename, info); //transcribe API 호출
+        // endMeeting(sasUrl, filename, info); //transcribe API 호출
     } catch (error) {
         console.error("회의 종료 중 오류 발생:", error);
         alert("회의 종료 중 오류가 발생했습니다. 다시 시도해 주세요.");
