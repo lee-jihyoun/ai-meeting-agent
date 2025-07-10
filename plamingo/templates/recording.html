@@ -10,19 +10,19 @@
     </div>
 </head>
 <body>
-<h1>Plamingo</h1>
-<!-- <form id="meetingForm" autocomplete="off">  -->
+  <h1>Plamingo</h1>
+  <!-- <form id="meetingForm" autocomplete="off">  -->
 
-<div class="container">
+  <div class="container">
     <h3><label>회의 제목 </label></h3>
     <input type="text" id="meeting-title" placeholder="회의 제목을 입력하세요." required><br><br><!-- 회의 제목 입력 필드 -->
-</div>
-<div class="container">
+  </div>
+  <div class="container">
     <h3><label>회의 내용 </label></h3>
     <textarea id="meeting-content" rows="4" placeholder="회의 내용을 입력하세요." required></textarea><br><br><!-- 회의 내용 입력 필드 -->
-</div>
+  </div>
 
-<div class="container">
+  <div class="container">
     <h3><label>작성자 </label></h3>
     <div class="row">
         <input type="text" id="writer-name" placeholder="이름 입력" required><!-- 작성자 이름 입력 필드 -->
@@ -32,12 +32,12 @@
             <option>선임</option>
             <option>책임</option>
         </select>
-
+        
         <input type="email" id="writer-email" placeholder="이메일 입력" required><!-- 작성자 이메일 입력 필드 -->
     </div>
-</div>
+  </div>
 
-<div class="container">
+  <div class="container">
     <h3><label class="fixed-label">참석자 </label></h3>
     <div class="scroll-container" id="attendees"><!-- 참석자 입력 필드 -->
         <div class="input-row row">
@@ -52,44 +52,44 @@
             <button class="fab add-btn" onclick="addAttendeeRow(this)">+</button><!-- 참석자 추가 버튼 -->
         </div>
     </div>
-</div>
+  </div>
 
-<div class="container">
+  <div class="container">
     <h3><label>파일 첨부 </label></h3>
 
     <div class="row">
-        <!-- 숨겨둔 실제 파일 입력 -->
-        <input type="file"
-               id="docFile"
-               accept=".pdf,.ppt,.pptx,.png,.jpg,.jpeg,.tif,.tiff"
-               style="display:none" multiple />
+      <!-- 숨겨둔 실제 파일 입력 -->
+      <input type="file"
+            id="docFile"
+            accept=".pdf,.ppt,.pptx,.png,.jpg,.jpeg,.tif,.tiff"
+            style="display:none" multiple />
 
-        <!-- 사용자가 클릭할 버튼 -->
-        <button id="docSelectBtn" type="button">파일 선택</button>
-        <span id="docList" style="margin-left:8px;color:#555">선택된 파일 없음</span>
+      <!-- 사용자가 클릭할 버튼 -->
+      <button id="docSelectBtn" type="button">파일 선택</button>
+      <span id="docList" style="margin-left:8px;color:#555">선택된 파일 없음</span>
     </div>
-</div>
+  </div>
 
-<br>
-<br>
-<div class="container">
+  <br>
+  <br>
+  <div class="container">
     <h3><label>경과시간 </label></h3>
     <span id="timerDisplay">00:00:00</span><!-- 경과 시간 표시-->
-</div>
-<br>
-<br>
+  </div>
+  <br>
+  <br>
 
-<div class="container buttons">
+  <div class="container buttons">
     <button id="startBtn" type="button" class="disabled-btn">회의 시작</button><!-- 회의 시작 버튼 -->
     <button id="stopBtn" style="display: none;">회의 종료</button><!-- 회의 종료 버튼 -->
     <!-- 로딩 메시지 및 스피너 (초기에는 숨김) -->
     <div id="loadingIndicator" style="display: none;">
-        <span>진행 중입니다...</span>
-        <span class="spinner"></span>
+      <span>진행 중입니다...</span>
+      <span class="spinner"></span>
     </div>
-</div>
-<!-- </form> -->
-<script src="{{ url_for('static', filename='main.js') }}"></script>
-
+  </div>
+  <!-- </form> -->
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+  
 </body>
 </html>
