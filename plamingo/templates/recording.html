@@ -2,13 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <div id="serverStatus" class="server-status-banner">
-    서버와 연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.
-  </div>
   <title>Plamingo</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <!-- Favicon 설정 : 404 에러 방지-->
-  <link rel="shortcut icon" href="#">
+    <link rel="icon" href="{{ url_for('static', filename='flamingo.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <div id="serverStatus" class="server-status-banner">
+        서버와 연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.
+    </div>
 </head>
 <body>
   <h1>Plamingo</h1>
