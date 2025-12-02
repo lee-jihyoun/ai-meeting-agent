@@ -82,9 +82,10 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
   };
 
   return (
-    <form id="meeting-form-data" onSubmit={handleSubmit}>
-      <div className="container">
-        <h3><label>회의 제목</label></h3>
+    <form id="meeting-form-data" onSubmit={handleSubmit} className="space-y-6">
+      {/* 회의 제목 */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">회의 제목</label>
         <input
           type="text"
           placeholder="회의 제목을 입력하세요."
@@ -93,14 +94,19 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
             setMeetingTitle(e.target.value);
             clearError('meetingTitle');
           }}
-          className={errors.meetingTitle ? 'invalid' : ''}
+          className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            errors.meetingTitle
+              ? 'border-red-300 bg-red-50'
+              : 'border-gray-200 hover:border-gray-300'
+          }`}
           disabled={isRecording || isLoading}
           required
         />
       </div>
 
-      <div className="container">
-        <h3><label>회의 내용</label></h3>
+      {/* 회의 내용 */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">회의 내용</label>
         <textarea
           rows="4"
           placeholder="회의 내용을 입력하세요."
@@ -109,24 +115,33 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
             setMeetingContent(e.target.value);
             clearError('meetingContent');
           }}
-          className={errors.meetingContent ? 'invalid' : ''}
+          className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+            errors.meetingContent
+              ? 'border-red-300 bg-red-50'
+              : 'border-gray-200 hover:border-gray-300'
+          }`}
           disabled={isRecording || isLoading}
           required
         />
       </div>
 
-      <div className="container">
-        <h3><label>작성자</label></h3>
-        <div className="row">
+      {/* 작성자 */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">작성자</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input
             type="text"
-            placeholder="이름 입력"
+            placeholder="이름"
             value={writerName}
             onChange={(e) => {
               setWriterName(e.target.value);
               clearError('writerName');
             }}
-            className={errors.writerName ? 'invalid' : ''}
+            className={`px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.writerName
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
             disabled={isRecording || isLoading}
             required
           />
@@ -136,7 +151,11 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
               setWriterPosition(e.target.value);
               clearError('writerPosition');
             }}
-            className={errors.writerPosition ? 'invalid' : ''}
+            className={`px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.writerPosition
+                ? 'border-red-300 bg-red-50 text-red-600'
+                : 'border-gray-200 hover:border-gray-300 text-gray-700'
+            }`}
             disabled={isRecording || isLoading}
             required
           >
@@ -147,78 +166,83 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
           </select>
           <input
             type="email"
-            placeholder="이메일 입력"
+            placeholder="이메일"
             value={writerEmail}
             onChange={(e) => {
               setWriterEmail(e.target.value);
               clearError('writerEmail');
             }}
-            className={errors.writerEmail ? 'invalid' : ''}
+            className={`px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.writerEmail
+                ? 'border-red-300 bg-red-50'
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
             disabled={isRecording || isLoading}
             required
           />
         </div>
       </div>
 
-      <div className="container">
-        <h3><label className="fixed-label">참석자</label></h3>
-        <div className="scroll-container">
+      {/* 참석자 */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">참석자</label>
+        <div className="max-h-64 overflow-y-auto space-y-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
           {attendees.map((attendee, index) => (
-            <div key={index} className="input-row row">
+            <div key={index} className="flex gap-2 items-center bg-white p-3 rounded-lg shadow-sm">
               <input
                 type="text"
-                className="name-input"
-                placeholder="이름 입력"
+                placeholder="이름"
                 value={attendee.name}
                 onChange={(e) => {
                   updateAttendee(index, 'name', e.target.value);
                   clearError(`attendee_${index}`);
                 }}
+                className="flex-1 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isRecording || isLoading}
                 required
               />
               <select
-                className="position-input"
                 value={attendee.position}
                 onChange={(e) => {
                   updateAttendee(index, 'position', e.target.value);
                   clearError(`attendee_${index}`);
                 }}
+                className="flex-1 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                 disabled={isRecording || isLoading}
                 required
               >
-                <option value="" disabled>직급 선택</option>
+                <option value="" disabled>직급</option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
               </select>
               <input
                 type="text"
-                className="role-input"
-                placeholder="역할 입력"
+                placeholder="역할"
                 value={attendee.authorRole}
                 onChange={(e) => {
                   updateAttendee(index, 'authorRole', e.target.value);
                   clearError(`attendee_${index}`);
                 }}
+                className="flex-1 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isRecording || isLoading}
                 required
               />
               {index === attendees.length - 1 ? (
                 <button
                   type="button"
-                  className="fab add-btn"
                   onClick={addAttendee}
                   disabled={isRecording || isLoading}
+                  className="w-9 h-9 rounded-full bg-white border-2 border-green-500 text-green-500 font-bold hover:bg-green-50 transition-all duration-200 flex items-center justify-center"
                 >
                   +
                 </button>
               ) : (
                 <button
                   type="button"
-                  className="fab remove-btn"
                   onClick={() => removeAttendee(index)}
                   disabled={isRecording || isLoading}
+                  className="w-9 h-9 rounded-full bg-white border-2 border-red-500 text-red-500 font-bold hover:bg-red-50 transition-all duration-200 flex items-center justify-center"
                 >
                   -
                 </button>
