@@ -10,6 +10,7 @@ from report_api.meeting_agent import summarize_meeting_notes, make_json_to_html
 from transcribe_api.audio_upload import upload_to_blob
 from flask import send_from_directory
 import logging
+from slack_integration import send_meeting_email_notification, send_meeting_notes_notification
 
 
 # /healthcheck 요청은 로그에서 제외
@@ -68,6 +69,17 @@ def transcribe():
     container_name = "meeting-notes"
     upload_to_blob(file_name, meeting_notes, container_name, email)
 
+    # 6. Slack 알림 전송 (MCP 사용)
+    try:
+        meeting_notes_url = f"https://{account_name}.blob.core.windows.net/{container_name}/{file_name}.html"
+        slack_result = send_meeting_notes_notification(info, file_name, meeting_notes_url)
+        if slack_result.get('success'):
+            print(f"✅ Slack 알림 전송 성공")
+        else:
+            print(f"⚠️ Slack 알림 전송 실패: {slack_result.get('error')}")
+    except Exception as e:
+        print(f"⚠️ Slack 알림 중 오류 (무시하고 계속): {e}")
+
     return jsonify({'status': 'success'}), 200
 
 
@@ -81,25 +93,49 @@ def webhook_handler():
     info = request.get_json(force=True)
     # 요청 데이터(JSON)를 가져옴
     data = request.get_json()
-    print("webhook_handler data : ", data)
+    print("=" * 80)
+    print("webhook_handler 호출됨")
+    print("받은 데이터:", data)
+    print("=" * 80)
 
     # 예외 처리: 데이터가 없거나 "meetingAction"이 없을 경우 오류 반환
     if not data or "meetingAction" not in data:
+        print("⚠️ meetingAction 파라미터 누락")
         return jsonify({"error": "Missing meetingAction parameter"}), 400
 
     headers = {"Content-Type": "application/json"}
 
     try:
+        print("Logic Apps로 요청 전송 중...")
         external_response = requests.post(LOGIC_APP_URL, json=info, headers=headers, verify=False)
+        print(f"Logic Apps 응답 상태 코드: {external_response.status_code}")
 
         if external_response.status_code == 200:
+            # Logic Apps 요청 성공 시 Slack 알림 전송
+            print("🚀 Slack 알림 전송 시작...")
+            try:
+                slack_result = send_meeting_email_notification(data)
+                print(f"Slack 결과: {slack_result}")
+                if slack_result.get('success'):
+                    print("✅ Slack 알림 전송 성공")
+                else:
+                    print(f"❌ Slack 알림 전송 실패: {slack_result.get('error')}")
+            except Exception as slack_error:
+                print(f"💥 Slack 알림 중 오류 발생: {slack_error}")
+                import traceback
+                traceback.print_exc()
+                # Slack 실패는 전체 프로세스에 영향 주지 않음
+
             return jsonify({
                 "status: ": "ok"
             }), 200
         else:
+            print(f"⚠️ Logic Apps 응답 오류: {external_response.status_code}")
             return jsonify({"error": "Invalid meetingAction type"}), 400
     except requests.exceptions.RequestException as e:
-        print("webhook_handler 웹 요청 중 오류 발생:", e)
+        print(f"💥 webhook_handler 웹 요청 중 오류 발생: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 @app.route('/generate_sas_url', methods=['GET'])
@@ -149,4 +185,8 @@ def healthcheck():
 
 
 if __name__ == '__main__':
+    # 로컬 개발 환경
+    # app.run(host='0.0.0.0', port=8080, debug=True)
+    
+    # 프로덕션 환경 (SSL 인증서 필요)
     app.run(host='0.0.0.0', port='443', ssl_context=('cert.pem', 'key.pem'))
