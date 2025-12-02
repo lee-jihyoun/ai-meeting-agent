@@ -2,6 +2,7 @@ azure-cognitiveservices-speech == 1.43.0
 azure-ai-formrecognizer == 3.3.3
 python-dotenv == 1.1.0
 flask
+flask-cors
 requests
 azure-storage-blob
 openai == 1.82.1
