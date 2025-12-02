@@ -11,6 +11,7 @@ from transcribe_api.audio_upload import upload_to_blob
 from flask import send_from_directory
 import logging
 from slack_integration import send_meeting_email_notification, send_meeting_notes_notification
+from google_calendar import create_calendar_event_from_meeting
 
 
 # /healthcheck 요청은 로그에서 제외
@@ -79,6 +80,16 @@ def transcribe():
             print(f"⚠️ Slack 알림 전송 실패: {slack_result.get('error')}")
     except Exception as e:
         print(f"⚠️ Slack 알림 중 오류 (무시하고 계속): {e}")
+
+    # 7. 구글 캘린더에 다음 회의 일정 저장 (옵션)
+    try:
+        calendar_result = create_calendar_event_from_meeting(meeting_json, info)
+        if calendar_result.get('success'):
+            print(f"✅ 구글 캘린더 이벤트 생성 성공: {calendar_result.get('event_link')}")
+        else:
+            print(f"ℹ️ 구글 캘린더 이벤트 미생성: {calendar_result.get('message', calendar_result.get('error'))}")
+    except Exception as e:
+        print(f"⚠️ 구글 캘린더 처리 중 오류 (무시하고 계속): {e}")
 
     return jsonify({'status': 'success'}), 200
 

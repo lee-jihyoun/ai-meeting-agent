@@ -24,3 +24,6 @@ speech-service/output/
 # 로그 관련
 plamingo/log/
 plamingo/output/
+/node_modules/.bin
+/node_modules
+plamingo/google-calendar-credentials.json

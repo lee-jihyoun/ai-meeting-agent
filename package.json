@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@zencoderai/slack-mcp-server": "^0.0.1"
+    "@zencoderai/slack-mcp-server": "^0.0.1",
+    "@cocal/google-calendar-mcp": "^2.0.7"
   }
 }
