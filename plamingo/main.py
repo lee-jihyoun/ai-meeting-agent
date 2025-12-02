@@ -10,6 +10,7 @@ from report_api.meeting_agent import summarize_meeting_notes, make_json_to_html
 from transcribe_api.audio_upload import upload_to_blob
 from flask import send_from_directory
 import logging
+from slack_mcp_notifier import slack_notifier
 
 
 # /healthcheck 요청은 로그에서 제외
@@ -67,6 +68,14 @@ def transcribe():
     # 5. 회의록 blob 업로드
     container_name = "meeting-notes"
     upload_to_blob(file_name, meeting_notes, container_name, email)
+
+    # 6. Slack 알림 전송 (MCP 사용)
+    try:
+        meeting_notes_url = f"https://{account_name}.blob.core.windows.net/{container_name}/{file_name}.html"
+        slack_notifier.send_meeting_notification(info, file_name, meeting_notes_url)
+        print(f"✅ Slack 알림 전송 시도 완료")
+    except Exception as e:
+        print(f"⚠️ Slack 알림 전송 중 오류 (무시하고 계속): {e}")
 
     return jsonify({'status': 'success'}), 200
 
