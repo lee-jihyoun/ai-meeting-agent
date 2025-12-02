@@ -4,10 +4,16 @@ function Timer({ startTime, isRunning }) {
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    if (!isRunning || !startTime) {
+    if (!startTime) {
       setElapsed(0);
       return;
     }
+
+    if (!isRunning) {
+      return;
+    }
+
+    setElapsed(Math.floor((Date.now() - startTime) / 1000));
 
     const interval = setInterval(() => {
       setElapsed(Math.floor((Date.now() - startTime) / 1000));
@@ -23,11 +29,13 @@ function Timer({ startTime, isRunning }) {
   return (
     <div className="flex flex-col items-center justify-center space-y-3">
       <label className="text-sm font-semibold text-gray-700">경과시간</label>
-      <div className={`text-6xl font-bold font-mono transition-all duration-300 ${
-        isRunning
-          ? 'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500 animate-pulse'
-          : 'text-gray-400'
-      }`}>
+      <div
+        className={`text-6xl font-bold font-mono transition-all duration-300 ${
+          isRunning
+            ? 'text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500 animate-pulse'
+            : 'text-gray-400'
+        }`}
+      >
         {`${hours}:${minutes}:${seconds}`}
       </div>
       {isRunning && (

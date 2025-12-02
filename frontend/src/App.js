@@ -50,6 +50,7 @@ function App() {
   };
 
   const handleStopMeeting = async () => {
+    setIsRecording(false);
     setIsLoading(true);
 
     try {
@@ -97,7 +98,6 @@ function App() {
       alert('회의 종료 중 오류가 발생했습니다. 다시 시도해 주세요.');
     } finally {
       setIsLoading(false);
-      setIsRecording(false);
       setStartTime(null);
       setMeetingInfo(null);
     }
@@ -143,7 +143,10 @@ function App() {
                 const formData = document.getElementById('meeting-form-data');
                 console.log('폼 찾음:', formData);
                 if (formData) {
-                  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                  const submitEvent = new Event('submit', {
+                    bubbles: true,
+                    cancelable: true,
+                  });
                   formData.dispatchEvent(submitEvent);
                 } else {
                   console.error('폼을 찾을 수 없습니다');
