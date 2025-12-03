@@ -92,7 +92,7 @@ function App() {
         }
       );
 
-      alert('회의가 종료되었습니다. 회의록이 생성 중입니다.');
+      alert('회의록 생성이 완료되었습니다.');
     } catch (error) {
       console.error('회의 종료 중 오류 발생:', error);
       alert('회의 종료 중 오류가 발생했습니다. 다시 시도해 주세요.');
