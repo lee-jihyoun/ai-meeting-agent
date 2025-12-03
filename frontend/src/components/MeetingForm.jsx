@@ -7,7 +7,7 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
   const [writerPosition, setWriterPosition] = useState('');
   const [writerEmail, setWriterEmail] = useState('');
   const [attendees, setAttendees] = useState([
-    { name: '', position: '', authorRole: '' }
+    { name: '', position: '', authorRole: '' },
   ]);
 
   const [errors, setErrors] = useState({});
@@ -24,10 +24,15 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
     if (!meetingContent.trim()) newErrors.meetingContent = true;
     if (!writerName.trim()) newErrors.writerName = true;
     if (!writerPosition) newErrors.writerPosition = true;
-    if (!writerEmail.trim() || !validateEmail(writerEmail)) newErrors.writerEmail = true;
+    if (!writerEmail.trim() || !validateEmail(writerEmail))
+      newErrors.writerEmail = true;
 
     attendees.forEach((attendee, index) => {
-      if (!attendee.name.trim() || !attendee.position || !attendee.authorRole.trim()) {
+      if (
+        !attendee.name.trim() ||
+        !attendee.position ||
+        !attendee.authorRole.trim()
+      ) {
         newErrors[`attendee_${index}`] = true;
       }
     });
@@ -54,7 +59,9 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
         title: meetingTitle,
         content: meetingContent,
         writer: [writerName, writerPosition, writerEmail],
-        attendees: attendees.filter(a => a.name && a.position && a.authorRole),
+        attendees: attendees.filter(
+          (a) => a.name && a.position && a.authorRole
+        ),
         startTime: startTimeFormatted,
       };
       onStart(info);
@@ -85,7 +92,9 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
     <form id="meeting-form-data" onSubmit={handleSubmit} className="space-y-6">
       {/* 회의 제목 */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-700">회의 제목</label>
+        <label className="block text-sm font-semibold text-gray-700">
+          회의 제목
+        </label>
         <input
           type="text"
           placeholder="회의 제목을 입력하세요."
@@ -106,7 +115,9 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
 
       {/* 회의 내용 */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-700">회의 내용</label>
+        <label className="block text-sm font-semibold text-gray-700">
+          회의 내용
+        </label>
         <textarea
           rows="4"
           placeholder="회의 내용을 입력하세요."
@@ -127,7 +138,9 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
 
       {/* 작성자 */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-700">작성자</label>
+        <label className="block text-sm font-semibold text-gray-700">
+          작성자
+        </label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input
             type="text"
@@ -151,7 +164,13 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
               setWriterPosition(e.target.value);
               clearError('writerPosition');
             }}
-            className={`px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            style={{
+              backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 12px center',
+              backgroundSize: '16px 16px',
+            }}
+            className={`px-4 py-3 pr-10 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${
               errors.writerPosition
                 ? 'border-red-300 bg-red-50 text-red-600'
                 : 'border-gray-200 hover:border-gray-300 text-gray-700'
@@ -159,7 +178,9 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
             disabled={isRecording || isLoading}
             required
           >
-            <option value="" disabled>직급 선택</option>
+            <option value="" disabled>
+              직급 선택
+            </option>
             <option>전임</option>
             <option>선임</option>
             <option>책임</option>
@@ -185,10 +206,15 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
 
       {/* 참석자 */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-700">참석자</label>
+        <label className="block text-sm font-semibold text-gray-700">
+          참석자
+        </label>
         <div className="max-h-64 overflow-y-auto space-y-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
           {attendees.map((attendee, index) => (
-            <div key={index} className="flex gap-2 items-center bg-white p-3 rounded-lg shadow-sm">
+            <div
+              key={index}
+              className="flex gap-2 items-center bg-white p-3 rounded-lg shadow-sm"
+            >
               <input
                 type="text"
                 placeholder="이름"
@@ -207,11 +233,19 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
                   updateAttendee(index, 'position', e.target.value);
                   clearError(`attendee_${index}`);
                 }}
-                className="flex-1 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  backgroundSize: '16px 16px',
+                }}
+                className="flex-1 px-3 py-2 pr-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 appearance-none"
                 disabled={isRecording || isLoading}
                 required
               >
-                <option value="" disabled>직급</option>
+                <option value="" disabled>
+                  직급
+                </option>
                 <option>전임</option>
                 <option>선임</option>
                 <option>책임</option>
@@ -257,11 +291,12 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
 
 function formatDateLocal(timestamp) {
   const date = new Date(timestamp);
-  const z = n => n.toString().padStart(2, '0');
+  const z = (n) => n.toString().padStart(2, '0');
   return (
     date.getFullYear().toString() +
     z(date.getMonth() + 1) +
-    z(date.getDate()) + '_' +
+    z(date.getDate()) +
+    '_' +
     z(date.getHours()) +
     z(date.getMinutes()) +
     z(date.getSeconds())
