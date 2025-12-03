@@ -11,6 +11,7 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
   ]);
 
   const [errors, setErrors] = useState({});
+  const [shouldScrollToLast, setShouldScrollToLast] = useState(false);
   const attendeesContainerRef = useRef(null);
   const lastAttendeeRef = useRef(null);
 
@@ -72,16 +73,18 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
 
   const addAttendee = () => {
     setAttendees([...attendees, { name: '', position: '', authorRole: '' }]);
+    setShouldScrollToLast(true);
   };
 
   useEffect(() => {
-    if (lastAttendeeRef.current) {
+    if (shouldScrollToLast && lastAttendeeRef.current) {
       lastAttendeeRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
       });
+      setShouldScrollToLast(false);
     }
-  }, [attendees.length]);
+  }, [shouldScrollToLast, attendees.length]);
 
   const removeAttendee = (index) => {
     setAttendees(attendees.filter((_, i) => i !== index));
