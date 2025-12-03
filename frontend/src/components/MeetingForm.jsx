@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function MeetingForm({ onStart, isRecording, isLoading }) {
   const [meetingTitle, setMeetingTitle] = useState('');
@@ -11,6 +11,8 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
   ]);
 
   const [errors, setErrors] = useState({});
+  const attendeesContainerRef = useRef(null);
+  const lastAttendeeRef = useRef(null);
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -71,6 +73,15 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
   const addAttendee = () => {
     setAttendees([...attendees, { name: '', position: '', authorRole: '' }]);
   };
+
+  useEffect(() => {
+    if (lastAttendeeRef.current) {
+      lastAttendeeRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [attendees.length]);
 
   const removeAttendee = (index) => {
     setAttendees(attendees.filter((_, i) => i !== index));
@@ -209,10 +220,14 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
         <label className="block text-sm font-semibold text-gray-700">
           참석자
         </label>
-        <div className="max-h-64 overflow-y-auto space-y-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+        <div
+          ref={attendeesContainerRef}
+          className="max-h-64 overflow-y-auto space-y-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200"
+        >
           {attendees.map((attendee, index) => (
             <div
               key={index}
+              ref={index === attendees.length - 1 ? lastAttendeeRef : null}
               className="flex gap-2 items-center bg-white p-3 rounded-lg shadow-sm"
             >
               <input
