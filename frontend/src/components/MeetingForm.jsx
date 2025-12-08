@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 
-function MeetingForm({ onStart, isRecording, isLoading }) {
+const MeetingForm = forwardRef(({ onStart, isRecording, isLoading }, ref) => {
   const [meetingTitle, setMeetingTitle] = useState('');
   const [meetingContent, setMeetingContent] = useState('');
   const [writerName, setWriterName] = useState('');
@@ -101,6 +101,34 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
     delete newErrors[field];
     setErrors(newErrors);
   };
+
+  const resetForm = () => {
+    setMeetingTitle('');
+    setMeetingContent('');
+    setWriterName('');
+    setWriterPosition('');
+    setWriterEmail('');
+    setAttendees([{ name: '', position: '', authorRole: '' }]);
+    setErrors({});
+  };
+
+  const formatDateLocal = (timestamp) => {
+    const date = new Date(timestamp);
+    const z = (n) => n.toString().padStart(2, '0');
+    return (
+      date.getFullYear().toString() +
+      z(date.getMonth() + 1) +
+      z(date.getDate()) +
+      '_' +
+      z(date.getHours()) +
+      z(date.getMinutes()) +
+      z(date.getSeconds())
+    );
+  };
+
+  useImperativeHandle(ref, () => ({
+    resetForm,
+  }));
 
   return (
     <form id="meeting-form-data" onSubmit={handleSubmit} className="space-y-6">
@@ -305,20 +333,8 @@ function MeetingForm({ onStart, isRecording, isLoading }) {
       </div>
     </form>
   );
-}
+});
 
-function formatDateLocal(timestamp) {
-  const date = new Date(timestamp);
-  const z = (n) => n.toString().padStart(2, '0');
-  return (
-    date.getFullYear().toString() +
-    z(date.getMonth() + 1) +
-    z(date.getDate()) +
-    '_' +
-    z(date.getHours()) +
-    z(date.getMinutes()) +
-    z(date.getSeconds())
-  );
-}
+MeetingForm.displayName = 'MeetingForm';
 
 export default MeetingForm;
