@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import requests, os
 from dotenv import load_dotenv
 import sys
@@ -24,6 +25,7 @@ logging.getLogger("werkzeug").addFilter(HealthCheckFilter())
 
 
 app = Flask(__name__)
+CORS(app)  # React에서 API 호출 허용
 load_dotenv()
 LOGIC_APP_URL = os.getenv("LOGIC_APP_URL")
 account_name = "staz01plamingo01"
@@ -158,4 +160,8 @@ def healthcheck():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='443', ssl_context=('cert.pem', 'key.pem'))
+    app.run(
+        host='0.0.0.0',
+        port=8080,
+        ssl_context=('localhost+2.pem', 'localhost+2-key.pem'),
+    )
