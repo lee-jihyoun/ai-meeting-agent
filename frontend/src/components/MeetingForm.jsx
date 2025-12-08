@@ -269,7 +269,11 @@ const MeetingForm = forwardRef(({ onStart, isRecording, isLoading }, ref) => {
                   updateAttendee(index, 'name', e.target.value);
                   clearError(`attendee_${index}`);
                 }}
-                className="flex-1 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-1 px-3 py-2 rounded-md border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors[`attendee_${index}`]
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
                 disabled={isRecording || isLoading}
                 required
               />
@@ -285,7 +289,11 @@ const MeetingForm = forwardRef(({ onStart, isRecording, isLoading }, ref) => {
                   backgroundPosition: 'right 12px center',
                   backgroundSize: '16px 16px',
                 }}
-                className="flex-1 px-3 py-2 pr-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 appearance-none"
+                className={`flex-1 px-3 py-2 pr-10 rounded-md border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${
+                  errors[`attendee_${index}`]
+                    ? 'border-red-300 bg-red-50 text-red-600'
+                    : 'border-gray-300 text-gray-700'
+                }`}
                 disabled={isRecording || isLoading}
                 required
               >
@@ -304,7 +312,11 @@ const MeetingForm = forwardRef(({ onStart, isRecording, isLoading }, ref) => {
                   updateAttendee(index, 'authorRole', e.target.value);
                   clearError(`attendee_${index}`);
                 }}
-                className="flex-1 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-1 px-3 py-2 rounded-md border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors[`attendee_${index}`]
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
                 disabled={isRecording || isLoading}
                 required
               />
