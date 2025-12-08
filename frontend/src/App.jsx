@@ -14,6 +14,7 @@ function App() {
   const [meetingInfo, setMeetingInfo] = useState(null);
 
   const audioRecorderRef = useRef(new AudioRecorder());
+  const meetingFormRef = useRef();
 
   // 서버 상태 체크
   useEffect(() => {
@@ -93,6 +94,11 @@ function App() {
       );
 
       alert('회의록 생성이 완료되었습니다.');
+
+      // 폼 초기화
+      if (meetingFormRef.current) {
+        meetingFormRef.current.resetForm();
+      }
     } catch (error) {
       console.error('회의 종료 중 오류 발생:', error);
       alert('회의 종료 중 오류가 발생했습니다. 다시 시도해 주세요.');
@@ -123,6 +129,7 @@ function App() {
 
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           <MeetingForm
+            ref={meetingFormRef}
             onStart={handleStartMeeting}
             isRecording={isRecording}
             isLoading={isLoading}
