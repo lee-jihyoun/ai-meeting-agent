@@ -5,7 +5,7 @@
 - Node.js 14 이상
 - npm 6 이상
 
-## 빠른 시작
+## 시작하기
 
 ### 1. 의존성 설치
 
@@ -16,7 +16,15 @@ cd frontend
 npm install
 ```
 
-### 2. 개발 서버 실행
+### 2. 환경 변수 설정
+
+`.env` 파일에서 API URL을 확인하세요:
+
+```
+REACT_APP_API_URL=http://localhost:5000
+```
+
+### 3. 개발 서버 실행
 
 ```bash
 npm start
@@ -24,7 +32,7 @@ npm start
 
 실행 후 브라우저에서 자동으로 `http://localhost:3000`이 열립니다.
 
-### 3. 백엔드 서버 연동
+### 4. 백엔드 서버 연동
 
 프론트엔드가 백엔드 API와 통신하려면 Flask 서버를 먼저 실행해야 합니다.
 
