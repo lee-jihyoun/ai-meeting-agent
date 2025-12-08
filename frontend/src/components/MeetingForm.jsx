@@ -221,7 +221,7 @@ const MeetingForm = forwardRef(({ onStart, isRecording, isLoading }, ref) => {
             required
           >
             <option value="" disabled>
-              직급 선택
+              직급
             </option>
             <option>전임</option>
             <option>선임</option>
