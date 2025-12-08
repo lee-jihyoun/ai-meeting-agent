@@ -5,7 +5,7 @@
 - Node.js 14 이상
 - npm 6 이상
 
-## 빠른 시작
+## 시작하기
 
 ### 1. 의존성 설치
 
@@ -16,7 +16,15 @@ cd frontend
 npm install
 ```
 
-### 2. 개발 서버 실행
+### 2. 환경 변수 설정
+
+`.env` 파일에서 API URL을 확인하세요:
+
+```
+REACT_APP_API_URL=http://localhost:5000
+```
+
+### 3. 개발 서버 실행
 
 ```bash
 npm start
@@ -24,7 +32,7 @@ npm start
 
 실행 후 브라우저에서 자동으로 `http://localhost:3000`이 열립니다.
 
-### 3. 백엔드 서버 연동
+### 4. 백엔드 서버 연동
 
 프론트엔드가 백엔드 API와 통신하려면 Flask 서버를 먼저 실행해야 합니다.
 
@@ -127,6 +135,70 @@ if __name__ == '__main__':
 # HTTPS certificates
 *.pem
 ```
+
+---
+
+# Slack 알림 설정
+
+회의록 생성 완료 시 Slack 채널로 알림을 받으려면 Slack Bot Token이 필요합니다.
+
+### Slack Bot Token 발급 방법
+
+#### 1. Slack App 생성
+
+1. [Slack API 사이트](https://api.slack.com/apps)에 접속
+2. **"Create New App"** 클릭
+3. **"From scratch"** 선택
+4. App 이름 입력 (예: `Plamingo Meeting Bot`)
+5. 워크스페이스 선택 후 **"Create App"** 클릭
+
+#### 2. Bot Token Scopes 설정
+
+1. 좌측 메뉴에서 **"OAuth & Permissions"** 클릭
+2. **"Scopes"** 섹션의 **"Bot Token Scopes"**로 이동
+3. 다음 권한들을 추가:
+   - `chat:write` - 메시지 전송
+   - `chat:write.public` - 공개 채널에 메시지 전송
+   - `files:write` - 파일 업로드 (선택사항)
+
+#### 3. 워크스페이스에 앱 설치
+
+1. 같은 페이지 상단의 **"OAuth Tokens for Your Workspace"** 섹션으로 이동
+2. **"Install to Workspace"** 버튼 클릭
+3. 권한 확인 후 **"허용"** 클릭
+4. **"Bot User OAuth Token"** 복사 (형식: `xoxb-...`)
+
+#### 4. 환경 변수 설정
+
+`plamingo/.env` 파일에 토큰 추가:
+
+```env
+SLACK_BOT_TOKEN=xoxb-your-bot-token-here // 발급받은 토근
+SLACK_CHANNEL=#테스트 // Slack 채널명
+
+SLACK_TEAM_ID=C1234567890 // 워크스페이스 ID
+
+SLACK_MCP_SERVER_COMMAND=npx
+SLACK_MCP_SERVER_ARGS=-y @modelcontextprotocol/server-slack
+```
+
+**채널 ID 확인 방법:**
+
+1. Slack 앱에서 알림을 받을 채널 열기
+2. 채널 이름 클릭 → 하단 **"채널 정보"** 확인
+3. 채널 ID 복사 (예: `C1234567890`)
+
+또는 채널에서 우클릭 → **"링크 복사"** → URL에서 마지막 부분이 채널 ID
+
+#### 5. 봇을 채널에 초대
+
+1. Slack에서 알림을 받을 채널로 이동
+2. 채널에서 `/invite @Plamingo Meeting Bot` 입력
+3. 또는 채널 정보 → **"통합"** → **"앱 추가"**에서 봇 선택
+
+### 테스트
+
+Flask 서버를 재시작하고 회의록을 생성한 후 Slack 채널에 알림이 오는지 확인하세요.
 
 ---
 
